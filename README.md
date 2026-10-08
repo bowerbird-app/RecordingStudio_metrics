@@ -4,7 +4,7 @@ Shared metrics and analytics for Recording Studio recordables and ordinary Activ
 
 This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic.
 
-Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.2.2`, Accessible dummy GitHub tag `v0.10.1`, Root Switchable dummy GitHub tag `v0.5.1`, FlatPack dummy GitHub tag `v0.1.196`.
+Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.2.2`, Accessible dummy GitHub tag `v0.11.1`, Root Switchable dummy GitHub tag `v0.5.1`, API dummy GitHub tag `v0.6.6`, Admin dummy GitHub tag `v2.0.5`, Cache dummy GitHub tag `v0.4.0`, FlatPack dummy GitHub tag `v0.1.196`.
 
 ## Architecture
 
@@ -99,18 +99,18 @@ Discovery does not calculate. `discover(api:)` returns only metrics exposed to t
 
 ## API integration
 
-Optional. Requires RecordingStudio_api. Endpoints are GET-only because API v0.6.4 matches registered routes by path and ignores verb.
+Optional. Requires RecordingStudio_api. Endpoints are GET-only. RS_API v0.6.6 matches registered routes by HTTP verb as well as path.
 
 ```ruby
 RecordingStudioMetrics.expose_to_api("members.total", api: :admin)
 RecordingStudioMetrics::Api.register!(api: :admin)
 ```
 
-Handlers only call `discover` / `execute`. See `docs/companion-changes.md` for API dispatch/verb follow-up.
+Handlers only call `discover` / `execute` and raise RS_API error classes for 404 / 403 / 422. See `docs/companion-changes.md` for remaining companion hooks.
 
 ## Admin integration
 
-Optional. Requires RecordingStudio_admin. Use `RecordingStudioMetrics::Admin.scalar_value` / `chart_series`, or `Admin.widget` to build a standalone Admin widget. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.
+Optional. Requires RecordingStudio_admin. Use `RecordingStudioMetrics::Admin.scalar_value` / `chart_series`, or `Admin.widget` to build a standalone Admin widget. Host screens can also use `summary_value`, `chart_series_proc`, and `attach_filters` against the existing Screen `summary` / `chart` / `widget` / `filter` API. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.
 
 ## Caching
 

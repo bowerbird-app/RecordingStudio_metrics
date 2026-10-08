@@ -24,9 +24,12 @@
         <% elsif @member_total %>
           <ul class="space-y-3 text-sm leading-6">
             <li>Members: <%= @member_total.value %></li>
+            <li>Active members: <%= @active_members.value %></li>
+            <li>Active registrations (status filter): <%= @filtered_active.data.sum { |point| point[:value] } %></li>
             <li>Projects: <%= @project_total.value %></li>
             <li>Projects with images: <%= @projects_with_images.value %></li>
             <li>Average images per project: <%= @average_images.value %></li>
+            <li>Site-wide members: <%= @site_member_total.value %></li>
           </ul>
         <% else %>
           <p class="text-sm">Seed a workspace to see metric results.</p>

@@ -90,8 +90,36 @@ class RegistryTest < Minitest::Test
       count :total
     end
 
-    assert_empty RecordingStudioMetrics.discover(api: :admin)
+    context = RecordingStudioMetrics::Context.new(actor: :a, scope: :root, workspace_id: "ws-1")
+    assert_empty RecordingStudioMetrics.discover(context: context, api: :admin)
     RecordingStudioMetrics.expose_to_api("users.total", api: :admin)
-    assert_equal(["users.total"], RecordingStudioMetrics.discover(api: :admin).map { |row| row[:identifier] })
+    assert_equal(
+      ["users.total"],
+      RecordingStudioMetrics.discover(context: context, api: :admin).map { |row| row[:identifier] }
+    )
+  end
+
+  def test_discover_without_context_is_empty
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    assert_empty RecordingStudioMetrics.discover
+    assert_empty RecordingStudioMetrics.discover(api: :admin)
+  end
+
+  def test_registration_reload_replaces_resource
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total
+    end
+
+    RecordingStudioMetrics.registry.stub(:reloading?, true) do
+      RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+        count :total
+        count :active
+      end
+    end
+
+    assert_equal %w[users.active users.total], RecordingStudioMetrics.definitions.map(&:identifier).sort
   end
 end

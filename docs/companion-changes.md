@@ -2,24 +2,25 @@
 
 RecordingStudioMetrics integrates only through extension points the companion gems already expose. This run does not open PRs on those repositories.
 
-## RecordingStudio_api (v0.6.4)
+## RecordingStudio_api (v0.6.6)
 
-Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`.
+Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422.
+
+1. Dispatch registered endpoints by HTTP verb as well as path. **Done in RS_API v0.6.6** (`registered_endpoint_request_match` uses `match(path:, http_verb:)`). Metrics stays GET-only by registration, not because the dispatcher ignores the verb.
 
 Needed from the API gem:
 
-1. Dispatch registered endpoints by HTTP verb as well as path. Today `registered_endpoint_request_match` uses `match_path` and ignores the verb, so metrics stays GET-only and cannot share a path with another verb.
-2. Optional: a documented hook to attach OpenAPI query parameters for filters/interval/start/end without putting that logic in each handler.
-3. Optional: a first-class error mapper for addon error objects (`error.code`) so metrics errors are not left as handler JSON bodies.
+2. Optional: a documented hook to attach OpenAPI query parameters for filters/interval/start/end without putting that logic in each handler. (This gem currently passes an `openapi[:parameters]` array on the execute endpoint.)
+3. Optional: `RegisteredEndpointsController` support for handler `{ json:, status: }` results. v0.6.6 still `render json:` only; status codes currently require raising the API error classes above.
 
 ## RecordingStudio_admin (v2.0.5)
 
-Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: }` series, and can build a standalone `RecordingStudioAdmin::Widget` when Admin is loaded.
+Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: }` series, builds a standalone `RecordingStudioAdmin::Widget` when Admin is loaded, maps metric filters onto `Screen.filter` via `Admin.attach_filters`, and supplies `summary_value` / `chart_series_proc` callables for existing Screen `summary` / `chart` DSLs. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs.
 
 Needed from the Admin gem:
 
 1. `RecordingStudioAdmin::Screen.metric_card(identifier, **)` and `metric_chart(identifier, **)` DSL methods that call the metrics execution service. Screen currently has `summary`, `chart`, `widget`, and `query` only.
-2. Optional: a filter bridge so a declared metric filter can be attached as a screen filter without copying filter metadata by hand.
+2. Optional: a first-class filter bridge so a declared metric filter can be attached as a screen filter without copying filter metadata by hand. (`Admin.attach_filters` is the host-side workaround.)
 
 ## RecordingStudio_cache (v0.4.0)
 

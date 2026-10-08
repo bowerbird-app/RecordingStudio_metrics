@@ -26,6 +26,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_000001) do
     t.string "status", default: "active", null: false
     t.string "country"
     t.boolean "verified", default: false, null: false
+    t.integer "age"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["created_at"], name: "index_members_on_created_at"

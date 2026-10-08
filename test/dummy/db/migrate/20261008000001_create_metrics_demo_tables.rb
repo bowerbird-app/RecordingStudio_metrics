@@ -7,6 +7,7 @@ class CreateMetricsDemoTables < ActiveRecord::Migration[8.1]
       t.string :status, null: false, default: "active"
       t.string :country
       t.boolean :verified, null: false, default: false
+      t.integer :age
       t.timestamps
     end
     add_index :members, :workspace_id

@@ -21,7 +21,17 @@ class AdminAdapterTest < Minitest::Test
     end
   end
 
+  def test_site_authorization_is_not_implied_by_site_scope
+    admin_context = Struct.new(:actor, :root_recording, :timezone).new(:user, nil, "UTC")
+
+    assert_raises(RecordingStudioMetrics::Errors::AuthorizationError) do
+      RecordingStudioMetrics::Admin.context_from_admin(admin_context, scope: :site)
+    end
+  end
+
   def test_widget_builder_requires_admin_gem
+    skip if defined?(RecordingStudioAdmin::Widget)
+
     error = assert_raises(LoadError) do
       RecordingStudioMetrics::Admin.widget("users.total")
     end

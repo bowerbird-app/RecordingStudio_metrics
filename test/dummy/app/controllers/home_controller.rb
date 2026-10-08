@@ -13,6 +13,15 @@ class HomeController < ApplicationController
     )
     @workspace = workspace
     @member_total = RecordingStudioMetrics.execute("members.total", context: context)
+    @active_members = RecordingStudioMetrics.execute("members.active", context: context)
+    @filtered_active = RecordingStudioMetrics.execute(
+      "members.registrations",
+      context: context,
+      interval: :month,
+      start_at: 3.months.ago.beginning_of_month,
+      end_at: Time.current.beginning_of_month + 1.month,
+      filters: { status: "active" }
+    )
     @project_total = RecordingStudioMetrics.execute("projects.total", context: context)
     @projects_with_images = RecordingStudioMetrics.execute("projects.with_images", context: context)
     @average_images = RecordingStudioMetrics.execute("projects.average_images", context: context)
@@ -22,6 +31,15 @@ class HomeController < ApplicationController
       interval: :month,
       start_at: 3.months.ago.beginning_of_month,
       end_at: Time.current.beginning_of_month + 1.month
+    )
+    @site_member_total = RecordingStudioMetrics.execute(
+      "members.site_total",
+      context: RecordingStudioMetrics::Context.new(
+        actor: current_user,
+        scope: :site,
+        site_authorized: true,
+        timezone: "UTC"
+      )
     )
   rescue RecordingStudioMetrics::Errors::Error
     @metrics_error = true

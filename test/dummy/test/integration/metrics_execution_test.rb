@@ -180,11 +180,12 @@ class MetricsExecutionTest < ActiveSupport::TestCase
 
   test "discovery distinguishes exposed metrics" do
     all = RecordingStudioMetrics.definitions.map(&:identifier)
-    exposed = RecordingStudioMetrics.discover(api: :admin).map { |row| row[:identifier] }
+    exposed = RecordingStudioMetrics.discover(context: root_context(@alpha), api: :admin).map { |row| row[:identifier] }
 
     assert_includes all, "members.total"
     assert_includes exposed, "members.total"
     refute_includes exposed, "projects.storage_used"
+    refute_includes exposed, "members.site_total"
   end
 
   private

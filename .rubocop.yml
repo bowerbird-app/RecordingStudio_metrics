@@ -32,31 +32,43 @@ Layout/LineLength:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
-    - 'lib/recording_studio_metrics/**/*.rb'
 
 Metrics/MethodLength:
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
-    - 'lib/recording_studio_metrics/**/*.rb'
+    - 'lib/recording_studio_metrics/admin.rb'
+    - 'lib/recording_studio_metrics/api.rb'
+    - 'lib/recording_studio_metrics/calculators/timeseries.rb'
 
 Metrics/AbcSize:
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
-    - 'lib/recording_studio_metrics/**/*.rb'
+    - 'lib/recording_studio_metrics/admin.rb'
+    - 'lib/recording_studio_metrics/api.rb'
+    - 'lib/recording_studio_metrics/calculators/timeseries.rb'
+    - 'lib/recording_studio_metrics/filter.rb'
 
 Metrics/CyclomaticComplexity:
   Exclude:
-    - 'lib/recording_studio_metrics/**/*.rb'
+    - 'lib/recording_studio_metrics/admin.rb'
+    - 'lib/recording_studio_metrics/api.rb'
+    - 'lib/recording_studio_metrics/filter.rb'
+    - 'lib/recording_studio_metrics/time_window.rb'
 
 Metrics/PerceivedComplexity:
   Exclude:
-    - 'lib/recording_studio_metrics/**/*.rb'
+    - 'lib/recording_studio_metrics/admin.rb'
+    - 'lib/recording_studio_metrics/api.rb'
+    - 'lib/recording_studio_metrics/filter.rb'
+    - 'lib/recording_studio_metrics/time_window.rb'
 
 Metrics/ParameterLists:
   Exclude:
-    - 'lib/recording_studio_metrics/**/*.rb'
+    - 'lib/recording_studio_metrics/context.rb'
+    - 'lib/recording_studio_metrics/result.rb'
+    - 'lib/recording_studio_metrics/admin.rb'
 
 Metrics/BlockLength:
   Exclude:

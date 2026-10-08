@@ -21,6 +21,11 @@ Rails.application.config.to_prepare do
           title: "Active members",
           scope: ->(relation) { relation.where(status: "active") }
 
+    count :site_total,
+          title: "Members (site)",
+          blast_radius: :site,
+          expose: { api: [:admin] }
+
     timeseries :registrations,
                field: :created_at,
                intervals: %i[hour day week month year],
@@ -31,7 +36,18 @@ Rails.application.config.to_prepare do
       filter :verified, field: :verified, type: :boolean
       filter :country, field: :country, type: :string
       filter :created_at, field: :created_at, type: :date_range
+      filter :age, field: :age, type: :numeric_range
+      filter :country_prefix, type: :string, handler: lambda { |relation, value, _context|
+        relation.where("country LIKE ?", "#{ActiveRecord::Base.sanitize_sql_like(value)}%")
+      }
     end
+
+    timeseries :headcount,
+               field: :created_at,
+               intervals: %i[day week month year],
+               default_interval: :month,
+               semantics: "population_at_end_of_period",
+               title: "Member headcount"
 
     breakdown :by_country, field: :country, title: "Members by country"
   end
@@ -45,6 +61,34 @@ Rails.application.config.to_prepare do
     count :total, title: "Total projects"
     sum :storage_used, field: :storage_bytes, title: "Storage used", unit: "bytes"
     average :storage, field: :storage_bytes, title: "Average project storage"
+
+    breakdown :storage_by_completed,
+              field: :completed,
+              measurement: :sum,
+              value_field: :storage_bytes,
+              title: "Storage by completion"
+
+    breakdown :average_storage_by_completed,
+              field: :completed,
+              measurement: :average,
+              value_field: :storage_bytes,
+              title: "Average storage by completion"
+
+    timeseries :storage,
+               field: :created_at,
+               measurement: :sum,
+               value_field: :storage_bytes,
+               intervals: %i[day week month year],
+               default_interval: :month,
+               title: "Storage added"
+
+    timeseries :average_storage,
+               field: :created_at,
+               measurement: :average,
+               value_field: :storage_bytes,
+               intervals: %i[day week month year],
+               default_interval: :month,
+               title: "Average storage added"
 
     custom :with_images, result_type: :scalar, title: "Projects with images" do |relation, _context|
       relation.where(id: ProjectImage.select(:project_id)).distinct.count
@@ -63,8 +107,32 @@ Rails.application.config.to_prepare do
     end
   end
 
+  RecordingStudioMetrics.register(
+    :folders,
+    model: Folder,
+    blast_radius: :root
+  ) do
+    count :total, title: "Folders in workspace"
+  end
+
   RecordingStudioMetrics.expose_to_api("members.total", api: :admin)
   RecordingStudioMetrics.expose_to_api("members.registrations", api: :admin)
   RecordingStudioMetrics.expose_to_api("projects.total", api: :admin)
   RecordingStudioMetrics.expose_to_api("projects.with_images", api: :admin)
+
+  if defined?(RecordingStudioAdmin::Widget)
+    RecordingStudioMetrics::Admin.attach_filters(MetricsAnalyticsScreen, "members.registrations")
+    RecordingStudioAdmin.register_widget(
+      RecordingStudioMetrics::Admin.widget("members.total", blast_radius: :root)
+    )
+    RecordingStudioAdmin.register_widget(
+      RecordingStudioMetrics::Admin.widget(
+        "members.registrations",
+        type: :chart,
+        blast_radius: :root,
+        interval: :month
+      )
+    )
+    RecordingStudioAdmin.register_screen(MetricsAnalyticsScreen)
+  end
 end
