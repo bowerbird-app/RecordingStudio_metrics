@@ -37,4 +37,32 @@ class AdminAdapterTest < Minitest::Test
     end
     assert_match(/RecordingStudioAdmin is not available/, error.message)
   end
+
+  def test_execute_passes_chosen_screen_filter_values
+    RecordingStudioMetrics.registry.reset!
+    RecordingStudioMetrics.register(:users, model: Class.new) do
+      count :total do
+        filter :status, field: :status, type: :enum, options: %w[active invited]
+      end
+    end
+
+    admin_context = Struct.new(:current_actor) do
+      def filter_value(key)
+        { status: "active" }[key.to_sym]
+      end
+    end.new(:user)
+
+    captured = nil
+    RecordingStudioMetrics.stub(:execute, lambda { |identifier, **kwargs|
+      captured = [identifier, kwargs]
+      RecordingStudioMetrics::Result.new(metric: identifier, type: :scalar, title: "Total", value: 1)
+    }) do
+      RecordingStudioMetrics::Admin.scalar_value("users.total", admin_context: admin_context, workspace_id: "ws-1")
+    end
+
+    assert_equal "users.total", captured[0]
+    assert_equal({ status: "active" }, captured[1][:filters])
+  ensure
+    RecordingStudioMetrics.registry.reset!
+  end
 end

@@ -121,7 +121,7 @@ Rails.application.config.to_prepare do
   RecordingStudioMetrics.expose_to_api("projects.with_images", api: :admin)
 
   if defined?(RecordingStudioAdmin::Widget)
-    RecordingStudioMetrics::Admin.attach_filters(MetricsAnalyticsScreen, "members.registrations")
+    MetricsAnalyticsScreen.attach_selected_metric_filters!
     RecordingStudioAdmin.register_widget(
       RecordingStudioMetrics::Admin.widget("members.total", blast_radius: :root)
     )

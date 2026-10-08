@@ -22,5 +22,7 @@ class MetricsAnalyticsScreen < RecordingStudioAdmin::Screen
   widget "metrics.members.total"
   widget "metrics.members.registrations"
 
-  filter :status, values: %w[active invited suspended], param: :status
+  def self.attach_selected_metric_filters!
+    RecordingStudioMetrics::Admin.attach_filters(self, "members.registrations", only: %i[status])
+  end
 end

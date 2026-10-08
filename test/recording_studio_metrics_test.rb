@@ -47,11 +47,11 @@ class RecordingStudioMetricsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.2.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.5.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.6.6"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.5"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.6.7"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.6"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.4.0"'
     refute_match(/^gem ["']recording_studio_cache["']/, gemfile)
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.196"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.209"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v4.2.1"'
     refute_includes gemfile, 'tag: "v4.2.0"'
@@ -148,7 +148,8 @@ class RecordingStudioMetricsTest < Minitest::Test
     initializer_source = File.read(initializer_path)
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
-    assert_includes initializer_source, "config.recordable_types = [ \"Workspace\", \"Folder\", \"Page\" ]"
+    assert_includes initializer_source,
+                    'config.recordable_types = [ "Workspace", "Folder", "Page", "AdminRoot", "AdminSection" ]'
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -169,10 +170,10 @@ class RecordingStudioMetricsTest < Minitest::Test
 
     assert_includes readme, "RecordingStudio"
     assert_includes readme, "dummy GitHub tag `v4.2.2`"
-    assert_includes readme, "dummy GitHub tag `v0.1.196`"
+    assert_includes readme, "dummy GitHub tag `v0.1.209`"
     assert_includes readme, "dummy GitHub tag `v0.11.1`"
-    assert_includes readme, "dummy GitHub tag `v0.6.6`"
-    assert_includes readme, "dummy GitHub tag `v2.0.5`"
+    assert_includes readme, "dummy GitHub tag `v0.6.7`"
+    assert_includes readme, "dummy GitHub tag `v2.0.6`"
     assert_includes readme, "dummy GitHub tag `v0.4.0`"
     assert_includes readme, "dummy GitHub tag `v0.5.1`"
     refute_includes readme, "dummy GitHub tag `v4.2.1`"

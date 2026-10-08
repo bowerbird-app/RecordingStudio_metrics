@@ -107,6 +107,10 @@ Metrics/ParameterLists:
     - 'lib/recording_studio_metrics/result.rb'
     - 'lib/recording_studio_metrics/time_window.rb'
 
+Metrics/ModuleLength:
+  Exclude:
+    - 'lib/recording_studio_metrics/admin.rb'
+
 Metrics/BlockLength:
   Exclude:
     - 'lib/recording_studio_metrics/engine.rb'

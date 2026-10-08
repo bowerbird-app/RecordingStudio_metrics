@@ -4,7 +4,7 @@ Shared metrics and analytics for Recording Studio recordables and ordinary Activ
 
 This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic.
 
-Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.2.2`, Accessible dummy GitHub tag `v0.11.1`, Root Switchable dummy GitHub tag `v0.5.1`, API dummy GitHub tag `v0.6.6`, Admin dummy GitHub tag `v2.0.5`, FlatPack dummy GitHub tag `v0.1.196`. Cache dummy GitHub tag `v0.4.0` is documented for hosts that can clone that private repo; this dummy bundle does not lock it because CI cannot fetch it.
+Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.2.2`, Accessible dummy GitHub tag `v0.11.1`, Root Switchable dummy GitHub tag `v0.5.1`, API dummy GitHub tag `v0.6.7`, Admin dummy GitHub tag `v2.0.6`, FlatPack dummy GitHub tag `v0.1.209`. Cache dummy GitHub tag `v0.4.0` is documented for hosts that can clone that private repo; this dummy bundle does not lock it because CI cannot fetch it.
 
 ## Architecture
 
@@ -99,7 +99,7 @@ Discovery does not calculate. `discover(api:)` returns only metrics exposed to t
 
 ## API integration
 
-Optional. Requires RecordingStudio_api. Endpoints are GET-only. RS_API v0.6.6 matches registered routes by HTTP verb as well as path.
+Optional. Requires RecordingStudio_api. Endpoints are GET-only. RS_API v0.6.7 matches registered routes by HTTP verb as well as path.
 
 ```ruby
 RecordingStudioMetrics.expose_to_api("members.total", api: :admin)
@@ -110,7 +110,7 @@ Handlers only call `discover` / `execute` and raise RS_API error classes for 404
 
 ## Admin integration
 
-Optional. Requires RecordingStudio_admin. Use `RecordingStudioMetrics::Admin.scalar_value` / `chart_series`, or `Admin.widget` to build a standalone Admin widget. Host screens can also use `summary_value`, `chart_series_proc`, and `attach_filters` against the existing Screen `summary` / `chart` / `widget` / `filter` API. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.
+Optional. Requires RecordingStudio_admin. Use `RecordingStudioMetrics::Admin.scalar_value` / `chart_series`, or `Admin.widget` to build a standalone Admin widget. Host screens can also use `summary_value`, `chart_series_proc`, and `attach_filters(..., only:)` against the existing Screen `summary` / `chart` / `widget` / `filter` API. Chosen screen filter values are passed into `execute`. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.
 
 ## Caching
 

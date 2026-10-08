@@ -308,7 +308,8 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
   end
 
   test "admin widget is a real Admin widget and analytics screen is registered" do
-    skip "RecordingStudioAdmin is not loaded" unless defined?(RecordingStudioAdmin::Widget)
+    assert defined?(RecordingStudioAdmin::Widget)
+    assert_equal "2.0.2", RecordingStudioAdmin::VERSION
 
     widget = RecordingStudioMetrics::Admin.widget("members.total", workspace_id: @alpha.id, blast_radius: :root)
     assert_instance_of RecordingStudioAdmin::Widget, widget
@@ -318,12 +319,30 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
     screen = RecordingStudioAdmin.screen_for("metrics_analytics")
     assert_equal MetricsAnalyticsScreen, screen
-    assert screen.filters.any?
+    assert_equal %i[status], screen.filters.map { |filter| filter.key.to_sym }
     assert_includes screen.widget_keys, "metrics.members.total"
   end
 
+  test "admin execute uses chosen screen filter values" do
+    admin_context = RecordingStudioAdmin::Context.new(
+      current_actor: @actor,
+      filter_values: { status: "active" }
+    )
+
+    result = RecordingStudioMetrics::Admin.execute(
+      "members.registrations",
+      admin_context: admin_context,
+      workspace_id: @alpha.id,
+      interval: :month,
+      start_at: Time.utc(2026, 7, 1),
+      end_at: Time.utc(2026, 10, 1)
+    )
+    assert_equal 2, result.data.sum { |row| row[:value] }
+  end
+
   test "api handlers map errors to rs_api statuses" do
-    skip "RecordingStudioApi is not loaded" unless defined?(RecordingStudioApi::NotFoundError)
+    assert defined?(RecordingStudioApi::NotFoundError)
+    assert_equal "0.6.7", RecordingStudioApi::VERSION
 
     context = api_context(resource: "missing", name: "total")
     assert_raises(RecordingStudioApi::NotFoundError) do

@@ -9,7 +9,8 @@ module RecordingStudioMetrics
       RecordingStudioMetrics.execute(
         identifier,
         context: context,
-        **params.slice(:interval, :start_at, :end_at, :filters, :cache)
+        **params.slice(:interval, :start_at, :end_at, :cache),
+        filters: execute_filters(identifier, admin_context, params)
       )
     end
 
@@ -43,10 +44,16 @@ module RecordingStudioMetrics
       build_admin_widget(definition, identifier, type, options)
     end
 
-    def attach_filters(screen_class, identifier)
+    def attach_filters(screen_class, identifier, only:)
       definition = RecordingStudioMetrics.registry.fetch(identifier)
+      names = Array(only).map(&:to_sym)
+      attached = screen_class.filters.map { |filter| filter.key.to_sym }
       definition.filters.each do |filter|
+        next unless names.include?(filter.name.to_sym)
+        next if attached.include?(filter.name.to_sym)
+
         screen_class.filter(filter.name, **admin_filter_options(filter))
+        attached << filter.name.to_sym
       end
     end
 
@@ -80,6 +87,36 @@ module RecordingStudioMetrics
     def admin_workspace_id(admin_context)
       recordable = admin_context.try(:access_recordable)
       recordable.try(:id) if recordable.respond_to?(:id)
+    end
+
+    def execute_filters(identifier, admin_context, params)
+      screen_values = screen_filter_values(identifier, admin_context)
+      explicit = params[:filters]
+      return screen_values if explicit.nil?
+
+      screen_values.merge(explicit)
+    end
+
+    def screen_filter_values(identifier, admin_context)
+      return {} unless admin_context.respond_to?(:filter_value)
+
+      definition = RecordingStudioMetrics.find(identifier)
+      return {} unless definition
+
+      definition.filters.each_with_object({}) do |filter, values|
+        value = admin_context.filter_value(filter.name)
+        next if value.nil? || value == ""
+
+        values[filter.name] = serialize_admin_filter_value(value)
+      end
+    end
+
+    def serialize_admin_filter_value(value)
+      if value.respond_to?(:start_date) && value.respond_to?(:end_date)
+        { start: value.start_date, end: value.end_date }
+      else
+        value
+      end
     end
 
     def build_admin_widget(definition, identifier, type, options)
