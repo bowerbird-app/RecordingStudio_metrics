@@ -74,7 +74,7 @@ Rails.application.config.to_prepare do
               value_field: :storage_bytes,
               title: "Average storage by completion"
 
-    timeseries :storage,
+    timeseries :storage_added,
                field: :created_at,
                measurement: :sum,
                value_field: :storage_bytes,

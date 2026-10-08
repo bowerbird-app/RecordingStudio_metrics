@@ -2,18 +2,22 @@
 
 require "test_helper"
 
-module RecordingStudioApi
-  class NotFoundError < StandardError; end
-  class AuthorizationError < StandardError; end
-  class InvalidActionInputError < StandardError
-    attr_reader :details
+unless defined?(RecordingStudioApi::NotFoundError)
+  module RecordingStudioApi
+    class NotFoundError < StandardError; end
 
-    def initialize(message = "Action input is invalid", details: [])
-      super(message)
-      @details = Array(details)
+    class AuthorizationError < StandardError; end
+
+    class InvalidActionInputError < StandardError
+      attr_reader :details
+
+      def initialize(message = "Action input is invalid", details: [])
+        super(message)
+        @details = Array(details)
+      end
     end
   end
-end unless defined?(RecordingStudioApi::NotFoundError)
+end
 
 class ApiAdapterTest < Minitest::Test
   FakeApiContext = Struct.new(:api_client, :credential, :access_recording, :access_grant, :root_recording, :params,
@@ -66,7 +70,7 @@ class ApiAdapterTest < Minitest::Test
   def test_unknown_metric_maps_to_not_found
     assert_raises(RecordingStudioApi::NotFoundError) do
       RecordingStudioMetrics::Api::ExecuteHandler.call(
-        api_context(resource: "missing", name: "total", workspace_id: "ws-1")
+        api_context(resource: "missing", name: "total")
       )
     end
   end

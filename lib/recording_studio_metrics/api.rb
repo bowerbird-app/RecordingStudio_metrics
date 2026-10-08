@@ -89,8 +89,6 @@ module RecordingStudioMetrics
         RecordingStudioApi::NotFoundError.new(error.public_message)
       when Errors::AuthorizationError, Errors::MissingContext
         RecordingStudioApi::AuthorizationError.new(error.public_message)
-      when Errors::InvalidFilter, Errors::UnsupportedInterval, Errors::InvalidDateRange
-        RecordingStudioApi::InvalidActionInputError.new(error.public_message)
       else
         RecordingStudioApi::InvalidActionInputError.new(error.public_message)
       end

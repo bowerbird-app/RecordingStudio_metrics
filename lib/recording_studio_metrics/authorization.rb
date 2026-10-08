@@ -67,9 +67,7 @@ module RecordingStudioMetrics
       attribute = inferred_scope_attribute(definition, relation)
       workspace_id = context.resolved_workspace_id
 
-      if context.scope == :recording && recordable_model?(definition.model)
-        return recording_relation(relation, context)
-      end
+      return recording_relation(relation, context) if context.scope == :recording && recordable_model?(definition.model)
 
       return relation.where(attribute => workspace_id) if attribute && workspace_id
 
@@ -100,9 +98,7 @@ module RecordingStudioMetrics
       raise Errors::AuthorizationError, "recording scope requires an access recording" unless recording
 
       record_id = recording_recordable_id(recording)
-      if record_id && relation.klass.column_names.include?("id")
-        return relation.where(id: record_id)
-      end
+      return relation.where(id: record_id) if record_id && relation.klass.column_names.include?("id")
 
       raise Errors::AuthorizationError, "recording scope could not isolate a record"
     end

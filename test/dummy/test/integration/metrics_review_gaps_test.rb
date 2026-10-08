@@ -157,7 +157,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
     assert_equal 3, year.data.sum { |row| row[:value] }
 
     storage = RecordingStudioMetrics.execute(
-      "projects.storage",
+      "projects.storage_added",
       context: root_context(@alpha),
       interval: :month,
       start_at: Time.utc(2026, 8, 1),
@@ -281,13 +281,13 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
     store = ActiveSupport::Cache::MemoryStore.new
     RecordingStudioMetrics.configuration.cache_store = store
 
-    alpha = RecordingStudioMetrics.execute("members.total", context: root_context(@alpha))
-    beta = RecordingStudioMetrics.execute("members.total", context: root_context(@beta))
-    alpha_again = RecordingStudioMetrics.execute("members.total", context: root_context(@alpha))
+    alpha = RecordingStudioMetrics.execute("projects.storage_used", context: root_context(@alpha))
+    beta = RecordingStudioMetrics.execute("projects.storage_used", context: root_context(@beta))
+    alpha_again = RecordingStudioMetrics.execute("projects.storage_used", context: root_context(@alpha))
 
-    assert_equal 3, alpha.value
-    assert_equal 4, beta.value
-    assert_equal 3, alpha_again.value
+    assert_equal 150, alpha.value
+    assert_equal 999, beta.value
+    assert_equal 150, alpha_again.value
   ensure
     RecordingStudioMetrics.configuration.cache_store = nil
   end
@@ -301,10 +301,10 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       RecordingStudioMetrics.execute("broken.total", context: root_context(@alpha), cache: false)
     end
   ensure
-    RecordingStudioMetrics.registry.stub(:reloading?, true) do
-      RecordingStudioMetrics.registry.instance_variable_get(:@metrics).delete("broken.total")
-      RecordingStudioMetrics.registry.instance_variable_get(:@resources).delete(:broken)
-    end
+    metrics = RecordingStudioMetrics.registry.instance_variable_get(:@metrics)
+    resources = RecordingStudioMetrics.registry.instance_variable_get(:@resources)
+    metrics.delete("broken.total")
+    resources.delete(:broken)
   end
 
   test "admin widget is a real Admin widget and analytics screen is registered" do

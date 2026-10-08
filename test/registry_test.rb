@@ -77,7 +77,8 @@ class RegistryTest < Minitest::Test
       end
     end
 
-    metadata = RecordingStudioMetrics.discover.first
+    context = RecordingStudioMetrics::Context.new(actor: :a, scope: :root, workspace_id: "ws-1")
+    metadata = RecordingStudioMetrics.discover(context: context).first
     assert_equal "users.registrations", metadata[:identifier]
     assert_equal :timeseries, metadata[:result_type]
     assert_equal %i[day week], metadata[:supported_intervals]

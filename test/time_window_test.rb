@@ -14,8 +14,13 @@ class TimeWindowTest < Minitest::Test
     assert_equal Time.utc(2026, 1, 5).in_time_zone("UTC").beginning_of_week(:monday), week.buckets.first
     assert_equal 3, week.buckets.size
 
-    year = window(interval: :year, start_at: Time.utc(2024, 1, 1), end_at: Time.utc(2026, 1, 1))
-    assert_equal %w[2024-01-01 2025-01-01], year.buckets.map { |bucket| year.format(bucket) }
+    year = window(
+      interval: :year,
+      start_at: Time.utc(2024, 1, 1),
+      end_at: Time.utc(2026, 1, 1),
+      max_period: 800.days
+    )
+    assert_equal(%w[2024-01-01 2025-01-01], year.buckets.map { |bucket| year.format(bucket) })
   end
 
   def test_dst_spring_forward_keeps_local_hour_boundaries
@@ -58,14 +63,14 @@ class TimeWindowTest < Minitest::Test
 
   private
 
-  def window(interval:, start_at:, end_at:, max_buckets: 400)
+  def window(interval:, start_at:, end_at:, max_buckets: 400, max_period: 400.days)
     RecordingStudioMetrics::TimeWindow.new(
       interval: interval,
       start_at: start_at,
       end_at: end_at,
       timezone: "UTC",
       max_buckets: max_buckets,
-      max_period: 400.days
+      max_period: max_period
     )
   end
 end
