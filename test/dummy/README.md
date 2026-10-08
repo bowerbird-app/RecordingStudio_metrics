@@ -10,6 +10,8 @@ This Rails app exists to validate the Recording Studio addon template in a real 
 - Recording Studio default layout, FlatPack assets, and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 - Dummy-only `/docs/*` pages for gem-specific onboarding
+- RecordingStudio API and Admin companion gems for metrics adapters (Cache v0.4.0 is documented; CI cannot clone that private repo)
+- Dummy Admin analytics screen (`MetricsAnalyticsScreen`) built with public Admin APIs
 
 ## Quick Start
 

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RecordingStudio.configure do |config|
-  # Registered delegated_type recordables (strings or classes)
-  config.recordable_types = [ "Workspace", "Folder", "Page" ]
+  # Host app recordables; addon engines append their own internal recordables.
+  config.recordable_types = [ "Workspace", "Folder", "Page", "AdminRoot", "AdminSection" ]
 
   # Require each configured ActiveRecord type to call recording_studio_recordable.
   config.require_recordable_declarations = true
