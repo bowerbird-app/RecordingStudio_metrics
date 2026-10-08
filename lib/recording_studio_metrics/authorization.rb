@@ -39,14 +39,20 @@ module RecordingStudioMetrics
     end
 
     def apply_scope(relation, definition, context)
-      return apply_metric_scope(relation, definition, context) if definition.scope
-      return apply_root_or_recording_scope(relation, definition, context) unless context.scope == :site
+      isolated = isolate_context_scope(relation, definition, context)
+      apply_metric_scope(isolated, definition, context)
+    end
 
-      relation
+    def isolate_context_scope(relation, definition, context)
+      return relation if context.scope == :site
+
+      apply_root_or_recording_scope(relation, definition, context)
     end
 
     def apply_metric_scope(relation, definition, context)
       scope = definition.scope
+      return relation unless scope
+
       scoped = if scope.arity == 1
                  scope.call(relation)
                else
@@ -61,7 +67,9 @@ module RecordingStudioMetrics
       attribute = inferred_scope_attribute(definition, relation)
       workspace_id = context.resolved_workspace_id
 
-      return recording_relation(relation, context) if context.scope == :recording && recordable_model?(definition.model)
+      if context.scope == :recording && recordable_model?(definition.model)
+        return recording_relation(relation, context)
+      end
 
       return relation.where(attribute => workspace_id) if attribute && workspace_id
 
@@ -91,16 +99,27 @@ module RecordingStudioMetrics
       recording = context.access_recording
       raise Errors::AuthorizationError, "recording scope requires an access recording" unless recording
 
-      if relation.klass.column_names.include?("id") && recording.respond_to?(:recordable_id)
-        return relation.where(id: recording.recordable_id)
+      record_id = recording_recordable_id(recording)
+      if record_id && relation.klass.column_names.include?("id")
+        return relation.where(id: record_id)
       end
 
-      relation
+      raise Errors::AuthorizationError, "recording scope could not isolate a record"
+    end
+
+    def recording_recordable_id(recording)
+      id = recording.try(:recordable_id)
+      return id if id.present?
+
+      recording.try(:recordable).try(:id)
     end
 
     def recordable_root_relation(relation, context)
       root = context.root_recording
-      recordings = RecordingStudio::Recording.where(root_recording_id: root.id, recordable_type: relation.klass.name)
+      recordings = RecordingStudio::Recording.where(
+        root_recording_id: root.id,
+        recordable_type: relation.klass.name
+      )
       relation.where(id: recordings.select(:recordable_id))
     end
   end

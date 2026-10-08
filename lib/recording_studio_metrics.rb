@@ -13,6 +13,7 @@ require "recording_studio_metrics/context"
 require "recording_studio_metrics/result"
 require "recording_studio_metrics/authorization"
 require "recording_studio_metrics/time_window"
+require "recording_studio_metrics/adapters/postgresql"
 require "recording_studio_metrics/calculators/base"
 require "recording_studio_metrics/calculators/count"
 require "recording_studio_metrics/calculators/sum"
@@ -24,7 +25,6 @@ require "recording_studio_metrics/cache"
 require "recording_studio_metrics/executor"
 require "recording_studio_metrics/api"
 require "recording_studio_metrics/admin"
-require "recording_studio_metrics/capabilities/example"
 
 module RecordingStudioMetrics
   class << self
@@ -66,10 +66,11 @@ module RecordingStudioMetrics
     end
 
     def discover(context: nil, api: nil)
+      return [] if context.nil?
+
       catalog = definitions
       catalog = catalog.select { |definition| definition.exposed_to_api?(api) } if api
-      catalog = catalog.select { |definition| Authorization.discoverable?(definition, context) } if context
-      catalog.map(&:metadata)
+      catalog.select { |definition| Authorization.discoverable?(definition, context) }.map(&:metadata)
     end
 
     def expose_to_api(identifier, api: :public)
