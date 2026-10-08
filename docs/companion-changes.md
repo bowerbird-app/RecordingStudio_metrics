@@ -26,6 +26,8 @@ Needed from the Admin gem:
 
 Done here: when Cache is loaded and the context has a Recording (`id` + `root_recording_id`), fetches use `RecordingStudioCache.fetch` with a vary hash that includes metric id, definition version, authorization scope, filters, interval, and timezone.
 
+The dummy Gemfile documents the intended pin (`github: "bowerbird-app/RecordingStudio_cache", tag: "v0.4.0"`) but does not lock the gem. This repository's CI org token cannot clone that private repo (API and Admin clones succeed). Hosts with access should add the gem.
+
 Needed from the Cache gem:
 
 1. A non-recording fetch API for site-wide metrics (no Recording object). Site-wide metrics currently fall back to `Rails.cache` so we do not invent a fake recording key.

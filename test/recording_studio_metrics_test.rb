@@ -50,6 +50,7 @@ class RecordingStudioMetricsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.6.6"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.5"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.4.0"'
+    refute_match(/^gem ["']recording_studio_cache["']/, gemfile)
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.196"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v4.2.1"'
