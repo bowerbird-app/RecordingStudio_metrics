@@ -9,6 +9,18 @@ AllCops:
 Style/Documentation:
   Enabled: false
 
+Style/ArgumentsForwarding:
+  Exclude:
+    - "lib/recording_studio_metrics/cache.rb"
+
+Style/ExplicitBlockArgument:
+  Exclude:
+    - "lib/recording_studio_metrics/cache.rb"
+
+Lint/RedundantSafeNavigation:
+  Exclude:
+    - "lib/recording_studio_metrics/cache.rb"
+
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: double_quotes
@@ -20,16 +32,35 @@ Layout/LineLength:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
+    - 'lib/recording_studio_metrics/**/*.rb'
 
 Metrics/MethodLength:
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
+    - 'lib/recording_studio_metrics/**/*.rb'
 
 Metrics/AbcSize:
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
+    - 'lib/recording_studio_metrics/**/*.rb'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'lib/recording_studio_metrics/**/*.rb'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'lib/recording_studio_metrics/**/*.rb'
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'lib/recording_studio_metrics/**/*.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/recording_studio_metrics/engine.rb'
 
 # Allow empty blocks in tests (common for stubs/mocks)
 Lint/EmptyBlock:

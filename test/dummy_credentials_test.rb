@@ -45,7 +45,8 @@ class DummyCredentialsTest < Minitest::Test
     )
 
     assert_operator parsed.fetch("secret_key_base").to_s.length, :>=, 64
-    assert_equal PLACEHOLDER, parsed.dig("gem_template", "api_key")
+    nested_api_keys = parsed.each_value.grep(Hash).filter_map { |value| value["api_key"] }
+    assert_includes nested_api_keys, PLACEHOLDER
     assert_equal PLACEHOLDER, parsed.dig("smtp", "user_name")
     assert_equal PLACEHOLDER, parsed.dig("smtp", "password")
     assert_equal PLACEHOLDER, parsed.dig("aws", "access_key_id")

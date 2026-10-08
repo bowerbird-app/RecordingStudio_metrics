@@ -1,0 +1,9 @@
+development:
+  default_timezone: "UTC"
+  max_timeseries_buckets: 400
+  cache_enabled: true
+
+production:
+  default_timezone: "UTC"
+  max_timeseries_buckets: 400
+  cache_enabled: true

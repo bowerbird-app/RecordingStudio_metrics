@@ -50,3 +50,27 @@ puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recordin
 puts "Seeded: Workspace '#{accessible_workspace.name}' with root recording ##{accessible_root_recording.id}"
 puts "Seeded: Workspace '#{private_workspace.name}' with root recording ##{private_root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
+
+now = Time.current
+[
+  { status: "active", country: "AU", verified: true, created_at: now - 2.months },
+  { status: "active", country: "US", verified: false, created_at: now - 1.month },
+  { status: "invited", country: "AU", verified: false, created_at: now - 3.days }
+].each do |attrs|
+  Member.find_or_create_by!(workspace: workspace, country: attrs[:country], status: attrs[:status]) do |member|
+    member.verified = attrs[:verified]
+    member.created_at = attrs[:created_at]
+  end
+end
+
+project = Project.find_or_create_by!(workspace: workspace, title: "Launch site") do |record|
+  record.storage_bytes = 4096
+  record.completed = true
+end
+ProjectImage.find_or_create_by!(project: project, file_size: 1024)
+Project.find_or_create_by!(workspace: workspace, title: "Empty draft") do |record|
+  record.storage_bytes = 0
+  record.completed = false
+end
+
+puts "Seeded: members and projects for metrics demo"
