@@ -3,7 +3,7 @@
 module RecordingStudioMetrics
   module Calculators
     class Average < Base
-      def call
+      def calculate
         value = filtered_relation.average(definition.field)
         result(value: value&.to_f)
       end

@@ -3,7 +3,7 @@
 module RecordingStudioMetrics
   module Calculators
     class Sum < Base
-      def call
+      def calculate
         result(value: numeric_or_zero(filtered_relation.sum(definition.field)))
       end
     end

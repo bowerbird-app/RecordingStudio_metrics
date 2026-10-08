@@ -34,6 +34,10 @@ module RecordingStudioMetrics
       values
     end
 
+    def bucket_end(bucket)
+      advance(bucket)
+    end
+
     def pg_interval
       interval.to_s
     end

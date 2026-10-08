@@ -33,7 +33,9 @@ module RecordingStudioMetrics
                 :source_location,
                 :measurement,
                 :grouping,
-                :semantics
+                :semantics,
+                :value_field,
+                :cumulative
 
     def initialize(**attrs)
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
@@ -96,7 +98,9 @@ module RecordingStudioMetrics
         cacheable: cacheable,
         cache_for: cache_for,
         exposed_apis: exposed_apis,
-        semantics: semantics
+        semantics: semantics,
+        value_field: value_field,
+        cumulative: cumulative
       }.compact
     end
 
@@ -131,14 +135,18 @@ module RecordingStudioMetrics
       unknown_intervals = intervals - INTERVALS
       raise ArgumentError, "Unsupported intervals #{unknown_intervals}" if unknown_intervals.any?
 
-      if %i[sum average breakdown timeseries].include?(metric_type) && field.nil? && metric_type != :custom &&
-         metric_type != :timeseries && %i[sum average breakdown].include?(metric_type)
-        raise ArgumentError, "#{metric_type} metrics require a field"
-      end
+      raise ArgumentError, "#{metric_type} metrics require a field" if field_required? && field.nil?
+      return unless numeric_measurement? && value_field.nil?
 
-      return unless metric_type == :timeseries && field.nil?
+      raise ArgumentError, "#{metric_type} #{measurement} metrics require a value_field"
+    end
 
-      raise ArgumentError, "timeseries metrics require a field"
+    def field_required?
+      %i[sum average breakdown timeseries].include?(metric_type)
+    end
+
+    def numeric_measurement?
+      %i[sum average].include?(measurement) && %i[breakdown timeseries].include?(metric_type)
     end
   end
 end

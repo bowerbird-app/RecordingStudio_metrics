@@ -3,7 +3,7 @@
 module RecordingStudioMetrics
   module Calculators
     class Count < Base
-      def call
+      def calculate
         result(value: filtered_relation.distinct.count)
       end
     end

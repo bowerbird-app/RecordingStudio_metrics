@@ -24,6 +24,14 @@ module RecordingStudioMetrics
       end
 
       def call
+        calculate
+      rescue Errors::Error
+        raise
+      rescue ActiveRecord::ActiveRecordError => e
+        raise Errors::CalculationError, e.message
+      end
+
+      def calculate
         raise NotImplementedError
       end
 

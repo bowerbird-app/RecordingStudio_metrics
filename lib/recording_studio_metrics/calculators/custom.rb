@@ -3,7 +3,7 @@
 module RecordingStudioMetrics
   module Calculators
     class Custom < Base
-      def call
+      def calculate
         calculator = definition.calculator
         raise Errors::CalculationError, "custom calculator is missing" unless calculator
 
