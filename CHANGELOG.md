@@ -7,13 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- Context workspace/root/recording isolation is always applied; metric `scope:` lambdas run on top of it.
-- API discovery, missing recording ids, and Admin site flags fail closed.
-- API handlers raise RS_API error classes (404/403/422) instead of returning errors as HTTP 200.
-- Breakdown supports sum and average; historical timeseries computes population at end of period.
-- PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
-
 ## [0.1.0] - 2026-10-08
 
 ### Added
@@ -23,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional Recording Studio API GET endpoint registration and Admin result adapters.
 - Optional cache keys that include authorization scope.
 - Dummy host examples for members, projects, and child-image metrics.
+
+### Fixed
+- Context workspace/root/recording isolation is always applied; metric `scope:` lambdas run on top of it.
+- API discovery, missing recording ids, and Admin site flags fail closed.
+- API handlers raise RS_API error classes (404/403/422) instead of returning errors as HTTP 200.
+- Breakdown supports sum and average; historical timeseries computes population at end of period.
+- PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
 [Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/releases/tag/v0.1.0
