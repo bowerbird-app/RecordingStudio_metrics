@@ -24,24 +24,36 @@ module RecordingStudioMetrics
       [{ name: series_name, data: points }]
     end
 
+    def summary_value(identifier, **params)
+      lambda { |admin_context|
+        scalar_value(identifier, admin_context: admin_context, **params)
+      }
+    end
+
+    def chart_series_proc(identifier, **params)
+      lambda { |admin_context|
+        chart_series(identifier, admin_context: admin_context, **params)
+      }
+    end
+
     def widget(identifier, type: :number, **options)
       raise LoadError, "RecordingStudioAdmin is not available" unless defined?(RecordingStudioAdmin::Widget)
 
       definition = RecordingStudioMetrics.registry.fetch(identifier)
-      RecordingStudioAdmin::Widget.new(options.delete(:key) || "metrics.#{identifier}", **options) do
-        type type
-        title options[:title] || definition.title || definition.name.to_s.humanize
-        if type.to_sym == :chart
-          chart_type options[:chart_type] || definition.preferred_chart || :line
-          series lambda { |admin_context|
-            RecordingStudioMetrics::Admin.chart_series(identifier, admin_context: admin_context)
-          }
-        else
-          value lambda { |admin_context|
-            RecordingStudioMetrics::Admin.scalar_value(identifier, admin_context: admin_context)
-          }
-        end
+      build_admin_widget(definition, identifier, type, options)
+    end
+
+    def attach_filters(screen_class, identifier)
+      definition = RecordingStudioMetrics.registry.fetch(identifier)
+      definition.filters.each do |filter|
+        screen_class.filter(filter.name, **admin_filter_options(filter))
       end
+    end
+
+    def admin_filter_options(filter)
+      options = { param: filter.name, label: filter.label }
+      options[:values] = filter.options if filter.options.any?
+      options
     end
 
     def context_from_admin(admin_context, **params)
@@ -49,16 +61,48 @@ module RecordingStudioMetrics
 
       scope = params[:scope] || admin_context.try(:blast_radius) || :root
       Context.new(
-        actor: admin_context.try(:actor) || admin_context.try(:user),
+        actor: admin_actor(admin_context),
         system: params[:system] || false,
         scope: scope,
-        access_recording: admin_context.try(:recording) || admin_context.try(:access_recording),
+        access_recording: admin_context.try(:access_recording) || admin_context.try(:recording),
         root_recording: admin_context.try(:root_recording),
         timezone: params[:timezone] || admin_context.try(:timezone),
-        workspace_id: params[:workspace_id],
+        workspace_id: params[:workspace_id] || admin_workspace_id(admin_context),
         authorized_relation: params[:authorized_relation],
-        site_authorized: params.fetch(:site_authorized, scope.to_sym == :site)
+        site_authorized: params.fetch(:site_authorized, false)
       )
+    end
+
+    def admin_actor(admin_context)
+      admin_context.try(:current_actor) || admin_context.try(:actor) || admin_context.try(:user)
+    end
+
+    def admin_workspace_id(admin_context)
+      recordable = admin_context.try(:access_recordable)
+      recordable.try(:id) if recordable.respond_to?(:id)
+    end
+
+    def build_admin_widget(definition, identifier, type, options)
+      key = options.delete(:key) || "metrics.#{identifier}"
+      blast_radius = options.delete(:blast_radius)
+      title_value = options.delete(:title) || definition.title || definition.name.to_s.humanize
+      chart_type_value = options.delete(:chart_type) || definition.preferred_chart || :line
+      execute_params = options.slice(:interval, :start_at, :end_at, :filters, :scope, :workspace_id, :site_authorized)
+
+      RecordingStudioAdmin::Widget.new(key, blast_radius: blast_radius) do
+        type type
+        title title_value
+        if type.to_sym == :chart
+          chart_type chart_type_value
+          series lambda { |admin_context|
+            RecordingStudioMetrics::Admin.chart_series(identifier, admin_context: admin_context, **execute_params)
+          }
+        else
+          value lambda { |admin_context|
+            RecordingStudioMetrics::Admin.scalar_value(identifier, admin_context: admin_context, **execute_params)
+          }
+        end
+      end
     end
   end
 end
