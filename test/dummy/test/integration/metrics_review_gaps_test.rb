@@ -306,7 +306,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "admin widget is a real Admin widget and analytics screen is registered" do
     assert defined?(RecordingStudioAdmin::Widget)
-    assert_equal "2.0.2", RecordingStudioAdmin::VERSION
+    assert_equal "2.1.0", RecordingStudioAdmin::VERSION
 
     widget = RecordingStudioMetrics::Admin.widget("members.total", workspace_id: @alpha.id, blast_radius: :root)
     assert_instance_of RecordingStudioAdmin::Widget, widget
