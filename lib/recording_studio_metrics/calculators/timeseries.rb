@@ -63,12 +63,25 @@ module RecordingStudioMetrics
         index_rows(rows, window)
       end
 
-      # A date column casts timestamps to dates. Bounding the query with "now"
-      # would drop the current day, so use the whole days the buckets cover.
+      # A date column casts a timestamp bound down to a date, which drops the day
+      # containing a non-midnight end. Compare calendar days in the window
+      # timezone, and include that end day unless end_at is exactly midnight.
       def period_range(window)
         return window.start_at...window.end_at unless date_column?
 
-        window.buckets.first.to_date...window.bucket_end(window.buckets.last).to_date
+        start_day = zoned_date(window.start_at, window)
+        finish = window.end_at.in_time_zone(window.timezone)
+        end_day = finish.to_date
+        end_day += 1 unless midnight?(finish)
+        start_day...end_day
+      end
+
+      def zoned_date(time, window)
+        time.in_time_zone(window.timezone).to_date
+      end
+
+      def midnight?(time)
+        time.hour.zero? && time.min.zero? && time.sec.zero? && time.subsec.zero?
       end
 
       def date_column?

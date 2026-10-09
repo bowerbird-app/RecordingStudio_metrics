@@ -42,6 +42,22 @@ class DateColumnTimeseriesTest < ActiveSupport::TestCase
     end
   end
 
+  test "date column week and month intervals stay inside the window" do
+    [Date.new(2026, 10, 5), Date.new(2026, 10, 6), Date.new(2026, 10, 7),
+     Date.new(2026, 10, 9), Date.new(2026, 10, 10), Date.new(2026, 10, 11)].each do |day|
+      UsageDailyMetric.create!(workspace_id: @workspace.id, metric_date: day)
+    end
+
+    start_at = Time.utc(2026, 10, 7)
+    end_at = Time.utc(2026, 10, 9, 12)
+
+    week = counts_by_date("usage_daily.calls", "UTC", interval: :week, start_at: start_at, end_at: end_at)
+    month = counts_by_date("usage_daily.calls", "UTC", interval: :month, start_at: start_at, end_at: end_at)
+
+    assert_equal({ "2026-10-05" => 2 }, week.select { |_date, value| value.positive? })
+    assert_equal({ "2026-10-01" => 2 }, month.select { |_date, value| value.positive? })
+  end
+
   test "date column rows stay on their calendar day in each timezone" do
     UsageDailyMetric.create!(workspace_id: @workspace.id, metric_date: Date.new(2026, 10, 8))
     UsageDailyMetric.create!(workspace_id: @workspace.id, metric_date: Date.new(2026, 10, 9))
@@ -141,17 +157,17 @@ class DateColumnTimeseriesTest < ActiveSupport::TestCase
     ) do
       timeseries :calls,
                  field: :metric_date,
-                 intervals: %i[day],
+                 intervals: %i[day week month],
                  default_interval: :day,
                  title: "Daily calls"
     end
   end
 
-  def counts_by_date(identifier, zone, start_at: nil, end_at: nil)
+  def counts_by_date(identifier, zone, interval: :day, start_at: nil, end_at: nil)
     result = RecordingStudioMetrics.execute(
       identifier,
       context: root_context(zone),
-      interval: :day,
+      interval: interval,
       start_at: start_at,
       end_at: end_at,
       cache: false

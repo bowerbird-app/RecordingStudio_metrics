@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.2] - 2026-10-09
 
 ### Fixed
-- Time series on `date` columns include the current day. The default window ends at the current time, and casting that timestamp to a date was dropping today.
+- Time series on `date` columns include the calendar day of a non-midnight `end_at`, so the default window includes today. The range starts on `start_at`'s calendar day and does not include other days from a week, month, or year bucket.
 - `date` columns truncate with `date_trunc(interval, column::timestamp)::date`, so a stored day stays on that day in every timezone. Timestamp columns still use timezone-aware `date_trunc`.
-- String `start_at` and `end_at` values parse as ISO 8601 dates or datetimes in the request timezone. Unparseable values raise `RecordingStudioMetrics::Errors::InvalidDateRange`.
+- String `start_at` and `end_at` values are parsed in the request timezone. Unparseable values raise `RecordingStudioMetrics::Errors::InvalidDateRange`.
 
 ### Upgrade notes
-- Charts of a `date` column now include the day that contains `end_at`, including today when the end is left as the current time. Each row stays on its own date in every timezone. Timestamp-column series are unchanged.
-- Pass a time, or an ISO 8601 date or datetime, for `start_at` and `end_at`. Values that are not dates or datetimes raise `InvalidDateRange`.
+- Charts of a `date` column now include the day that contains `end_at`, including today when the end is left as the current time, and leave out days before `start_at` or after `end_at`. Each row stays on its own date in every timezone. Timestamp-column series are unchanged.
+- Pass a time, or a string parsed in the request timezone, for `start_at` and `end_at`. Values that do not parse raise `InvalidDateRange`.
 
 ## [0.2.0] - 2026-10-09
 
