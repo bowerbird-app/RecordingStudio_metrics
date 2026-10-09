@@ -6,10 +6,13 @@ RecordingStudioMetrics.configure do |config|
   config.cache_enabled = true
 end
 
-Rails.application.config.to_prepare do
-  RecordingStudioMetrics.registry.reset!
+module DummyMetricsCatalog
+  module_function
 
-  RecordingStudioMetrics.register(
+  def load!
+    RecordingStudioMetrics.registry.reset!
+
+    RecordingStudioMetrics.register(
     :members,
     model: Member,
     scope_attribute: :workspace_id,
@@ -115,10 +118,15 @@ Rails.application.config.to_prepare do
     count :total, title: "Folders in workspace"
   end
 
-  RecordingStudioMetrics.expose_to_api("members.total", api: :admin)
-  RecordingStudioMetrics.expose_to_api("members.registrations", api: :admin)
-  RecordingStudioMetrics.expose_to_api("projects.total", api: :admin)
-  RecordingStudioMetrics.expose_to_api("projects.with_images", api: :admin)
+    RecordingStudioMetrics.expose_to_api("members.total", api: :admin)
+    RecordingStudioMetrics.expose_to_api("members.registrations", api: :admin)
+    RecordingStudioMetrics.expose_to_api("projects.total", api: :admin)
+    RecordingStudioMetrics.expose_to_api("projects.with_images", api: :admin)
+  end
+end
+
+Rails.application.config.to_prepare do
+  DummyMetricsCatalog.load!
 
   if defined?(RecordingStudioAdmin::Widget)
     MetricsAnalyticsScreen.attach_selected_metric_filters!

@@ -301,10 +301,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       RecordingStudioMetrics.execute("broken.total", context: root_context(@alpha), cache: false)
     end
   ensure
-    metrics = RecordingStudioMetrics.registry.instance_variable_get(:@metrics)
-    resources = RecordingStudioMetrics.registry.instance_variable_get(:@resources)
-    metrics.delete("broken.total")
-    resources.delete(:broken)
+    DummyMetricsCatalog.load!
   end
 
   test "admin widget is a real Admin widget and analytics screen is registered" do
@@ -353,7 +350,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
     payload = RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "site_members", name: "total"))
     assert_equal Member.count, payload[:value]
   ensure
-    unregister_resource(:site_members)
+    DummyMetricsCatalog.load!
   end
 
   test "api site metric with api_authorize false is forbidden" do
@@ -370,7 +367,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "site_members", name: "total"))
     end
   ensure
-    unregister_resource(:site_members)
+    DummyMetricsCatalog.load!
   end
 
   test "api site metric without api_authorize stays denied" do
@@ -400,7 +397,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
     assert_includes identifiers, "site_members.total"
     refute_includes identifiers, "members.site_total"
   ensure
-    unregister_resource(:site_members)
+    DummyMetricsCatalog.load!
   end
 
   test "api discovery hides site metrics the api_authorize hook denies" do
@@ -420,7 +417,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
     refute_includes identifiers, "site_members.total"
     assert_includes identifiers, "members.total"
   ensure
-    unregister_resource(:site_members)
+    DummyMetricsCatalog.load!
   end
 
   test "api handlers map errors to rs_api statuses" do
@@ -469,13 +466,6 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       workspace_id: workspace.id,
       timezone: "UTC"
     )
-  end
-
-  def unregister_resource(resource)
-    metrics = RecordingStudioMetrics.registry.instance_variable_get(:@metrics)
-    resources = RecordingStudioMetrics.registry.instance_variable_get(:@resources)
-    metrics.reject! { |_identifier, definition| definition.resource == resource.to_sym }
-    resources.delete(resource.to_sym)
   end
 
   def api_context(resource:, name:, filters: nil)
