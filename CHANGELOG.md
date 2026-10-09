@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-09
+
+### Fixed
+- Time series on `date` columns include the current day. The default window ends at the current time, and casting that timestamp to a date was dropping today.
+- `date` columns truncate with `date_trunc(interval, column::timestamp)::date`, so a stored day stays on that day in every timezone. Timestamp columns still use timezone-aware `date_trunc`.
+- String `start_at` and `end_at` values parse as ISO 8601 dates or datetimes in the request timezone. Unparseable values raise `RecordingStudioMetrics::Errors::InvalidDateRange`.
+
+### Upgrade notes
+- Charts of a `date` column now include the day that contains `end_at`, including today when the end is left as the current time. Each row stays on its own date in every timezone. Timestamp-column series are unchanged.
+- Pass a time, or an ISO 8601 date or datetime, for `start_at` and `end_at`. Values that are not dates or datetimes raise `InvalidDateRange`.
+
 ## [0.2.0] - 2026-10-09
 
 ### Added
@@ -33,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.1...v0.2.2
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/releases/tag/v0.1.0
