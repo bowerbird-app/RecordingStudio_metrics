@@ -22,6 +22,18 @@ class AdaptersTest < Minitest::Test
     assert_equal "date_trunc('month', members.created_at, 'UTC')", sql
   end
 
+  def test_postgresql_date_column_truncates_without_a_timezone
+    connection = FakeConnection.new("PostgreSQL")
+    sql = RecordingStudioMetrics::Adapters::Postgresql.truncate_date_sql(
+      connection,
+      "usage_daily_metrics",
+      "metric_date",
+      "day"
+    )
+
+    assert_equal "date_trunc('day', usage_daily_metrics.metric_date::timestamp)::date", sql
+  end
+
   def test_unknown_adapter_fails_closed
     connection = FakeConnection.new("SQLite")
 
