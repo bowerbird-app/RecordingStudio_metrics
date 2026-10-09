@@ -86,9 +86,7 @@ module RecordingStudioMetrics
       if hook
         return unless hook.call(api_context)
 
-        if definition.blast_radius == :site
-          overrides = overrides.merge(scope: :site, site_authorized: true)
-        end
+        overrides = overrides.merge(scope: :site, site_authorized: true) if definition.blast_radius == :site
       end
 
       Context.from_api(api_context, **overrides)
@@ -143,6 +141,7 @@ module RecordingStudioMetrics
 
         context = Api.context_from_api(api_context, definition: definition, timezone: api_context.params[:timezone])
         raise Errors::AuthorizationError, "metric is not authorized on this API" unless context
+
         result = RecordingStudioMetrics.execute(
           identifier,
           context: context,
