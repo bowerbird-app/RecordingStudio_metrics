@@ -2,16 +2,26 @@
 
 module RecordingStudioMetrics
   class DSL
-    attr_reader :metrics, :scope_attribute
+    attr_reader :metrics, :scope_attribute, :api_authorize
 
-    def initialize(resource, model:, blast_radius: :root, scope: nil, scope_attribute: nil, **resource_options)
+    def initialize(
+      resource,
+      model:,
+      blast_radius: :root,
+      scope: nil,
+      scope_attribute: nil,
+      api_authorize: nil,
+      **resource_options
+    )
       @resource = resource.to_sym
       @model = model
       @blast_radius = blast_radius
       @scope = scope
       @scope_attribute = scope_attribute
+      @api_authorize = api_authorize
       @resource_options = resource_options
       @metrics = []
+      validate_api_authorize!
     end
 
     def count(name, **, &)
@@ -53,6 +63,12 @@ module RecordingStudioMetrics
     end
 
     private
+
+    def validate_api_authorize!
+      return if api_authorize.nil? || api_authorize.respond_to?(:call)
+
+      raise ArgumentError, "api_authorize must be callable"
+    end
 
     def add(metric_type, name, **options, &block)
       filters = []

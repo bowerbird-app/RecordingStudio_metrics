@@ -33,6 +33,10 @@ module RecordingStudioMetrics
       @metrics.values.select { |definition| definition.resource == resource.to_sym }
     end
 
+    def api_authorize_for(resource)
+      @resources.dig(resource.to_sym, :api_authorize)
+    end
+
     def reset!
       @mutex.synchronize do
         @metrics = {}
@@ -63,7 +67,8 @@ module RecordingStudioMetrics
         @resources[key] = {
           model: dsl.instance_variable_get(:@model),
           scope: dsl.resource_scope,
-          scope_attribute: dsl.scope_attribute
+          scope_attribute: dsl.scope_attribute,
+          api_authorize: dsl.api_authorize
         }
       end
     end

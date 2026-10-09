@@ -81,6 +81,24 @@ module RecordingStudioMetrics
       raise map_to_api_error(error)
     end
 
+    def api_authorize_allows?(resource, api_context)
+      hook = RecordingStudioMetrics.registry.api_authorize_for(resource)
+      return true unless hook
+
+      hook.call(api_context)
+    end
+
+    def context_from_api(api_context, definition: nil, **overrides)
+      if definition &&
+         definition.blast_radius == :site &&
+         RecordingStudioMetrics.registry.api_authorize_for(definition.resource)
+        overrides[:scope] = :site
+        overrides[:site_authorized] = true
+      end
+
+      Context.from_api(api_context, **overrides)
+    end
+
     def map_to_api_error(error)
       return error unless defined?(RecordingStudioApi)
 
@@ -97,7 +115,30 @@ module RecordingStudioMetrics
     class DiscoveryHandler
       def self.call(api_context)
         context = Context.from_api(api_context)
-        { metrics: RecordingStudioMetrics.discover(context: context, api: api_context.api_key) }
+        api = api_context.api_key
+        metrics = RecordingStudioMetrics.discover(context: context, api: api).select do |metadata|
+          Api.api_authorize_allows?(metadata[:resource], api_context)
+        end
+
+        hook_allowed_site_resources = RecordingStudioMetrics.definitions.filter_map do |definition|
+          next unless definition.blast_radius == :site
+          next unless RecordingStudioMetrics.registry.api_authorize_for(definition.resource)
+          next unless Api.api_authorize_allows?(definition.resource, api_context)
+
+          definition.resource
+        end.uniq
+
+        if hook_allowed_site_resources.any?
+          site_context = Context.from_api(api_context, scope: :site, site_authorized: true)
+          RecordingStudioMetrics.discover(context: site_context, api: api).each do |metadata|
+            next unless hook_allowed_site_resources.include?(metadata[:resource])
+            next if metrics.any? { |row| row[:identifier] == metadata[:identifier] }
+
+            metrics << metadata
+          end
+        end
+
+        { metrics: metrics }
       rescue Errors::Error => e
         Api.raise_mapped!(e)
       end
@@ -111,8 +152,11 @@ module RecordingStudioMetrics
         unless definition.exposed_to_api?(api_context.api_key)
           raise Errors::AuthorizationError, "metric is not exposed on this API"
         end
+        unless Api.api_authorize_allows?(definition.resource, api_context)
+          raise Errors::AuthorizationError, "metric is not authorized on this API"
+        end
 
-        context = Context.from_api(api_context, timezone: api_context.params[:timezone])
+        context = Api.context_from_api(api_context, definition: definition, timezone: api_context.params[:timezone])
         result = RecordingStudioMetrics.execute(
           identifier,
           context: context,
