@@ -108,6 +108,21 @@ RecordingStudioMetrics::Api.register!(api: :admin)
 
 Handlers only call `discover` / `execute` and raise RS_API error classes for 404 / 403 / 422. See `docs/companion-changes.md` for remaining companion hooks.
 
+Site-wide models (no workspace column) stay denied over the API unless the owning gem passes its own access check at registration:
+
+```ruby
+RecordingStudioMetrics.register(
+  :users,
+  model: User,
+  blast_radius: :site,
+  api_authorize: ->(context) { MyGem::Access.staff?(context.actor) }
+) do
+  count :total, title: "Everyone on the site", expose: { api: [:admin] }
+end
+```
+
+`api_authorize` receives the RS_API request context. Falsy denies with 403 and hides the metric from discovery. Truthy on a `blast_radius: :site` resource grants site scope for that call. Omit it and `Context.from_api` behaves as before.
+
 ## Admin integration
 
 Optional. Requires RecordingStudio_admin. Use `RecordingStudioMetrics::Admin.scalar_value` / `chart_series`, or `Admin.widget` to build a standalone Admin widget. Host screens can also use `summary_value`, `chart_series_proc`, and `attach_filters(..., only:)` against the existing Screen `summary` / `chart` / `widget` / `filter` API. Chosen screen filter values are passed into `execute`. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.

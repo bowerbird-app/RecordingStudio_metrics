@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-09
+
+### Added
+- Optional `api_authorize:` callable on `RecordingStudioMetrics.register` so an owning gem can apply its own API access check.
+- When that callable is truthy for a `blast_radius: :site` resource, API execute and discovery use site scope. Falsy denies with 403 and hides the metric. Resources without the callable are unchanged.
+
+### Upgrade notes
+- No host change is required. Site metrics remain denied over the API unless the owning gem passes `api_authorize:`.
+
 ## [0.1.0] - 2026-10-08
 
 ### Added
@@ -24,5 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/releases/tag/v0.1.0

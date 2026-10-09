@@ -109,6 +109,25 @@ class RegistryTest < Minitest::Test
     assert_empty RecordingStudioMetrics.discover(api: :admin)
   end
 
+  def test_api_authorize_is_stored_on_the_resource
+    check = ->(_context) { true }
+    RecordingStudioMetrics.register(:users, model: ExampleRecord, api_authorize: check) do
+      count :total
+    end
+
+    assert_same check, RecordingStudioMetrics.registry.api_authorize_for(:users)
+    assert_nil RecordingStudioMetrics.registry.api_authorize_for(:missing)
+  end
+
+  def test_api_authorize_must_be_callable
+    error = assert_raises(ArgumentError) do
+      RecordingStudioMetrics.register(:users, model: ExampleRecord, api_authorize: :staff) do
+        count :total
+      end
+    end
+    assert_match(/api_authorize must be callable/, error.message)
+  end
+
   def test_registration_reload_replaces_resource
     RecordingStudioMetrics.register(:users, model: ExampleRecord) do
       count :total

@@ -81,6 +81,17 @@ module RecordingStudioMetrics
       raise map_to_api_error(error)
     end
 
+    def context_from_api(api_context, definition:, **overrides)
+      hook = RecordingStudioMetrics.registry.api_authorize_for(definition.resource)
+      if hook
+        return unless hook.call(api_context)
+
+        overrides = overrides.merge(scope: :site, site_authorized: true) if definition.blast_radius == :site
+      end
+
+      Context.from_api(api_context, **overrides)
+    end
+
     def map_to_api_error(error)
       return error unless defined?(RecordingStudioApi)
 
@@ -96,8 +107,24 @@ module RecordingStudioMetrics
 
     class DiscoveryHandler
       def self.call(api_context)
-        context = Context.from_api(api_context)
-        { metrics: RecordingStudioMetrics.discover(context: context, api: api_context.api_key) }
+        api = api_context.api_key
+        metrics = []
+
+        RecordingStudioMetrics.definitions.group_by(&:resource).each do |resource, definitions|
+          exposed = definitions.select { |definition| definition.exposed_to_api?(api) }
+          next if exposed.empty?
+
+          context = Api.context_from_api(api_context, definition: exposed.first)
+          next unless context
+
+          metrics.concat(
+            RecordingStudioMetrics.discover(context: context, api: api).select do |row|
+              row[:resource] == resource
+            end
+          )
+        end
+
+        { metrics: metrics }
       rescue Errors::Error => e
         Api.raise_mapped!(e)
       end
@@ -112,7 +139,9 @@ module RecordingStudioMetrics
           raise Errors::AuthorizationError, "metric is not exposed on this API"
         end
 
-        context = Context.from_api(api_context, timezone: api_context.params[:timezone])
+        context = Api.context_from_api(api_context, definition: definition, timezone: api_context.params[:timezone])
+        raise Errors::AuthorizationError, "metric is not authorized on this API" unless context
+
         result = RecordingStudioMetrics.execute(
           identifier,
           context: context,

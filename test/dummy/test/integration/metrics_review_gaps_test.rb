@@ -301,10 +301,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       RecordingStudioMetrics.execute("broken.total", context: root_context(@alpha), cache: false)
     end
   ensure
-    metrics = RecordingStudioMetrics.registry.instance_variable_get(:@metrics)
-    resources = RecordingStudioMetrics.registry.instance_variable_get(:@resources)
-    metrics.delete("broken.total")
-    resources.delete(:broken)
+    DummyMetricsCatalog.load!
   end
 
   test "admin widget is a real Admin widget and analytics screen is registered" do
@@ -338,6 +335,89 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       end_at: Time.utc(2026, 10, 1)
     )
     assert_equal 2, result.data.sum { |row| row[:value] }
+  end
+
+  test "api site metric with api_authorize true counts every row" do
+    RecordingStudioMetrics.register(
+      :site_members,
+      model: Member,
+      blast_radius: :site,
+      api_authorize: ->(_context) { true }
+    ) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    payload = RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "site_members", name: "total"))
+    assert_equal Member.count, payload[:value]
+  ensure
+    DummyMetricsCatalog.load!
+  end
+
+  test "api site metric with api_authorize false is forbidden" do
+    RecordingStudioMetrics.register(
+      :site_members,
+      model: Member,
+      blast_radius: :site,
+      api_authorize: ->(_context) { false }
+    ) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    assert_raises(RecordingStudioApi::AuthorizationError) do
+      RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "site_members", name: "total"))
+    end
+  ensure
+    DummyMetricsCatalog.load!
+  end
+
+  test "api site metric without api_authorize stays denied" do
+    assert_raises(RecordingStudioApi::AuthorizationError) do
+      RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "members", name: "site_total"))
+    end
+  end
+
+  test "api root metrics stay workspace scoped when a site hook exists on another resource" do
+    RecordingStudioMetrics.register(
+      :site_members,
+      model: Member,
+      blast_radius: :site,
+      api_authorize: ->(_context) { true }
+    ) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    payload = RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "members", name: "total"))
+    assert_equal 3, payload[:value]
+
+    discovered = RecordingStudioMetrics::Api::DiscoveryHandler.call(
+      api_context(resource: "members", name: "total")
+    )
+    identifiers = discovered[:metrics].map { |row| row[:identifier] }
+    assert_includes identifiers, "members.total"
+    assert_includes identifiers, "site_members.total"
+    refute_includes identifiers, "members.site_total"
+  ensure
+    DummyMetricsCatalog.load!
+  end
+
+  test "api discovery hides site metrics the api_authorize hook denies" do
+    RecordingStudioMetrics.register(
+      :site_members,
+      model: Member,
+      blast_radius: :site,
+      api_authorize: ->(_context) { false }
+    ) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    discovered = RecordingStudioMetrics::Api::DiscoveryHandler.call(
+      api_context(resource: "site_members", name: "total")
+    )
+    identifiers = discovered[:metrics].map { |row| row[:identifier] }
+    refute_includes identifiers, "site_members.total"
+    assert_includes identifiers, "members.total"
+  ensure
+    DummyMetricsCatalog.load!
   end
 
   test "api handlers map errors to rs_api statuses" do
