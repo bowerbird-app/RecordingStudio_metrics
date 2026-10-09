@@ -72,7 +72,7 @@ Custom calculators receive the already-authorized relation. Use that relation. D
 
 Filters must be declared. Unknown names, unknown operators, and undeclared columns are rejected. Values are bound as query parameters.
 
-Time series use half-open windows (`start` inclusive, `end` exclusive), timezone-aware `date_trunc` on PostgreSQL, chronological buckets, and zero-fill for count/sum gaps. Missing periods for averages stay empty (`nil`), not a fake zero. Creation-in-period is not the same as population-at-end-of-period; set `semantics:` when you mean the latter.
+Time series use half-open windows (`start` inclusive, `end` exclusive), chronological buckets, and zero-fill for count/sum gaps. Timestamp columns use timezone-aware `date_trunc` on PostgreSQL. `date` columns truncate the calendar value with no timezone (`date_trunc(interval, column::timestamp)::date`). Their filter runs from the calendar day of `start_at` through the day that contains `end_at`, and stops on `end_at`'s own day when that instant is midnight, so coarser buckets do not pull in days outside the window. `start_at` and `end_at` accept a time or a string parsed in the request timezone; a string that does not parse raises `RecordingStudioMetrics::Errors::InvalidDateRange`. Missing periods for averages stay empty (`nil`), not a fake zero. Creation-in-period is not the same as population-at-end-of-period; set `semantics:` when you mean the latter.
 
 ## Scope and authorization
 

@@ -68,9 +68,19 @@ module RecordingStudioMetrics
 
     def coerce(value)
       return if value.nil?
+      return coerce_string(value) if value.is_a?(String)
       return timezone.at(value) if value.respond_to?(:to_time)
 
       timezone.parse(value.to_s)
+    rescue ArgumentError
+      raise Errors::InvalidDateRange, "invalid time value"
+    end
+
+    def coerce_string(value)
+      parsed = timezone.parse(value)
+      raise Errors::InvalidDateRange, "invalid time value" if parsed.nil?
+
+      parsed
     rescue ArgumentError
       raise Errors::InvalidDateRange, "invalid time value"
     end

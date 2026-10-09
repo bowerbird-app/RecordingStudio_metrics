@@ -54,6 +54,50 @@ class TimeWindowTest < Minitest::Test
     assert_equal %w[2026-01-02 2026-01-03], dates
   end
 
+  def test_iso8601_strings_parse_in_the_request_timezone
+    zone = Time.find_zone!("America/Los_Angeles")
+    window = RecordingStudioMetrics::TimeWindow.new(
+      interval: :day,
+      start_at: "2026-10-01",
+      end_at: "2026-10-04T15:30:00",
+      timezone: "America/Los_Angeles",
+      max_buckets: 10,
+      max_period: 10.days
+    )
+
+    assert_equal zone.local(2026, 10, 1, 0, 0, 0), window.start_at
+    assert_equal zone.local(2026, 10, 4, 15, 30, 0), window.end_at
+    dates = window.buckets.map { |bucket| window.format(bucket) }
+    assert_equal %w[2026-10-01 2026-10-02 2026-10-03 2026-10-04], dates
+
+    zoned = RecordingStudioMetrics::TimeWindow.new(
+      interval: :day,
+      start_at: "2026-01-01T14:00:00Z",
+      end_at: "2026-01-03T12:00:00Z",
+      timezone: "Australia/Sydney",
+      max_buckets: 10,
+      max_period: 10.days
+    )
+    assert_equal Time.utc(2026, 1, 1, 14), zoned.start_at
+    assert_equal Time.utc(2026, 1, 3, 12), zoned.end_at
+    sydney_dates = zoned.buckets.map { |bucket| zoned.format(bucket) }
+    assert_equal %w[2026-01-02 2026-01-03], sydney_dates
+  end
+
+  def test_unparseable_strings_raise_invalid_date_range
+    ["not-a-date", "2026-13-40", ""].each do |garbage|
+      start_error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do
+        window(interval: :day, start_at: garbage, end_at: Time.utc(2026, 10, 4))
+      end
+      assert_equal "invalid time value", start_error.message
+
+      finish_error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do
+        window(interval: :day, start_at: Time.utc(2026, 10, 1), end_at: garbage)
+      end
+      assert_equal "invalid time value", finish_error.message
+    end
+  end
+
   def test_max_bucket_limit
     error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do
       window(interval: :hour, start_at: Time.utc(2026, 1, 1), end_at: Time.utc(2026, 1, 3), max_buckets: 3).buckets

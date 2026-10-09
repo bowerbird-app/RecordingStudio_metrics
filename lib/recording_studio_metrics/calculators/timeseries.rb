@@ -58,9 +58,34 @@ module RecordingStudioMetrics
       end
 
       def created_during_period(window)
-        rel = filtered_relation.where(definition.field => window.start_at...window.end_at)
+        rel = filtered_relation.where(definition.field => period_range(window))
         rows = grouped_values(rel, window)
         index_rows(rows, window)
+      end
+
+      # A date column casts a timestamp bound down to a date, which drops the day
+      # containing a non-midnight end. Compare calendar days in the window
+      # timezone, and include that end day unless end_at is exactly midnight.
+      def period_range(window)
+        return window.start_at...window.end_at unless date_column?
+
+        start_day = zoned_date(window.start_at, window)
+        finish = window.end_at.in_time_zone(window.timezone)
+        end_day = finish.to_date
+        end_day += 1 unless midnight?(finish)
+        start_day...end_day
+      end
+
+      def zoned_date(time, window)
+        time.in_time_zone(window.timezone).to_date
+      end
+
+      def midnight?(time)
+        time.hour.zero? && time.min.zero? && time.sec.zero? && time.subsec.zero?
+      end
+
+      def date_column?
+        relation.klass.columns_hash[definition.field.to_s]&.type == :date
       end
 
       def population_at_end(window)
@@ -122,13 +147,12 @@ module RecordingStudioMetrics
         table = relation.klass.quoted_table_name
         column = connection.quote_column_name(definition.field)
         adapter = Adapters.for_connection(connection)
-        adapter.truncate_sql(
-          connection,
-          table,
-          column,
-          window.pg_interval,
-          window.timezone.tzinfo.identifier
-        )
+        interval = window.pg_interval
+        if date_column?
+          adapter.truncate_date_sql(connection, table, column, interval)
+        else
+          adapter.truncate_sql(connection, table, column, interval, window.timezone.tzinfo.identifier)
+        end
       end
 
       def coerce_bucket_time(key, window)
