@@ -46,6 +46,14 @@ module RecordingStudioMetrics
         schema: { type: "string", format: "date-time" }
       },
       {
+        name: "group_by",
+        in: "query",
+        required: false,
+        description: "Split results by one of the metric's catalog group_by columns. Groups below " \
+                     "min_group_size rows are merged into `other`. Unsupported values are rejected.",
+        schema: { type: "string" }
+      },
+      {
         name: "timezone",
         in: "query",
         required: false,
@@ -197,7 +205,8 @@ module RecordingStudioMetrics
           interval: api_context.params[:interval],
           start_at: Api.period_bound(api_context.params, primary: :start, alias_key: :from, legacy: :start_at),
           end_at: Api.period_bound(api_context.params, primary: :end, alias_key: :to, legacy: :end_at),
-          filters: api_context.params[:filters] || {}
+          filters: api_context.params[:filters] || {},
+          group_by: api_context.params[:group_by]
         )
         result.as_json
       rescue Errors::Error => e

@@ -43,6 +43,7 @@ module RecordingStudioMetrics
         start_at: params[:start_at],
         end_at: params[:end_at],
         interval: params[:interval],
+        group_by: params[:group_by],
         timezone: context.timezone
       }
     end

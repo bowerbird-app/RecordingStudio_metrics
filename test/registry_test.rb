@@ -99,7 +99,7 @@ class RegistryTest < Minitest::Test
 
     assert_equal "count", entries[:total][:unit]
     assert_empty entries[:total][:group_by]
-    assert_equal [:country], entries[:by_country][:group_by]
+    assert_empty entries[:by_country][:group_by]
     assert_equal({ supported: false }, entries[:total][:date_range])
     assert_equal true, entries[:registrations][:date_range][:supported]
     assert_equal 366.days.to_i, entries[:registrations][:date_range][:max_period_seconds]
@@ -192,6 +192,33 @@ class RegistryTest < Minitest::Test
     end
 
     assert_equal %w[users.active users.total], RecordingStudioMetrics.definitions.map(&:identifier).sort
+  end
+
+  def test_group_by_is_only_allowed_on_groupable_metrics
+    assert_raises(ArgumentError) do
+      RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+        breakdown :by_country, field: :country, group_by: [:plan]
+      end
+    end
+    assert_raises(ArgumentError) do
+      RecordingStudioMetrics.register(:accounts, model: ExampleRecord) do
+        timeseries :headcount, field: :created_at, cumulative: true, group_by: [:plan]
+      end
+    end
+  end
+
+  def test_catalog_shows_min_group_size_for_groupable_metrics
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, group_by: [:country]
+      count :strict, group_by: [:country], min_group_size: 10
+      count :plain
+    end
+
+    entries = RecordingStudioMetrics.discover(context: catalog_context).to_h { |row| [row[:name], row] }
+
+    assert_equal 5, entries[:total][:min_group_size]
+    assert_equal 10, entries[:strict][:min_group_size]
+    refute entries[:plain].key?(:min_group_size)
   end
 
   private

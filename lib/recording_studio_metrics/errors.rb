@@ -25,6 +25,7 @@ module RecordingStudioMetrics
     class DuplicateRegistration < Error; end
     class InvalidFilter < Error; end
     class UnsupportedInterval < Error; end
+    class InvalidGroupBy < Error; end
     class InvalidDateRange < Error; end
     class MissingContext < Error; end
 

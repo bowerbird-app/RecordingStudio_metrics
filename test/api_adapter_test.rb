@@ -325,6 +325,27 @@ class ApiAdapterTest < Minitest::Test
     end
   end
 
+  def test_execute_passes_group_by_through
+    RecordingStudioMetrics.register(:members, model: ExampleRecord) do
+      count :total, group_by: [:country], expose: { api: [:admin] }
+    end
+
+    captured = {}
+    stub_result = RecordingStudioMetrics::Result.new(metric: "members.total", type: :scalar, value: 1)
+    execute = lambda do |_identifier, **kwargs|
+      captured = kwargs
+      stub_result
+    end
+
+    RecordingStudioMetrics.stub(:execute, execute) do
+      RecordingStudioMetrics::Api::ExecuteHandler.call(
+        api_context(resource: "members", name: "total", params: { group_by: "country" })
+      )
+    end
+
+    assert_equal "country", captured[:group_by]
+  end
+
   private
 
   class ExampleRecord

@@ -9,7 +9,8 @@ module RecordingStudioMetrics
                   :max_reporting_period,
                   :cache_enabled,
                   :default_cache_ttl,
-                  :cache_store
+                  :cache_store,
+                  :min_group_size
     attr_reader :hooks, :api_exposures
 
     def initialize
@@ -19,6 +20,7 @@ module RecordingStudioMetrics
       @cache_enabled = true
       @default_cache_ttl = 5.minutes
       @cache_store = nil
+      @min_group_size = 5
       @hooks = RecordingStudio::Hooks.new
       @api_exposures = Hash.new { |hash, key| hash[key] = Set.new }
     end
@@ -38,6 +40,7 @@ module RecordingStudioMetrics
         max_reporting_period: max_reporting_period,
         cache_enabled: cache_enabled,
         default_cache_ttl: default_cache_ttl,
+        min_group_size: min_group_size,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

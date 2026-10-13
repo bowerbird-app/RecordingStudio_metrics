@@ -37,7 +37,8 @@ module RecordingStudioMetrics
                 :value_field,
                 :cumulative,
                 :group_by,
-                :freshness
+                :freshness,
+                :min_group_size
 
     def initialize(**attrs)
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
@@ -105,7 +106,8 @@ module RecordingStudioMetrics
         value_field: value_field,
         cumulative: cumulative,
         group_by: group_by,
-        freshness: freshness
+        freshness: freshness,
+        min_group_size: min_group_size
       }.compact
     end
 
@@ -117,7 +119,15 @@ module RecordingStudioMetrics
         date_range: date_range_metadata,
         timezone: RecordingStudioMetrics.configuration.default_timezone,
         freshness: freshness || default_freshness
-      )
+      ).merge(group_by.any? ? { min_group_size: effective_min_group_size } : {})
+    end
+
+    def effective_min_group_size
+      min_group_size || RecordingStudioMetrics.configuration.min_group_size
+    end
+
+    def population_at_end?
+      cumulative == true || semantics.to_s == "population_at_end_of_period"
     end
 
     private
@@ -140,7 +150,7 @@ module RecordingStudioMetrics
     end
 
     def default_group_by
-      metric_type == :breakdown ? [field] : []
+      []
     end
 
     def date_range_metadata
@@ -173,9 +183,15 @@ module RecordingStudioMetrics
       raise ArgumentError, "Unsupported intervals #{unknown_intervals}" if unknown_intervals.any?
 
       raise ArgumentError, "#{metric_type} metrics require a field" if field_required? && field.nil?
+      raise ArgumentError, "#{identifier} does not support group_by" if group_by.any? && !groupable?
+
       return unless numeric_measurement? && value_field.nil?
 
       raise ArgumentError, "#{metric_type} #{measurement} metrics require a value_field"
+    end
+
+    def groupable?
+      %i[count sum average].include?(metric_type) || (metric_type == :timeseries && !population_at_end?)
     end
 
     def field_required?
