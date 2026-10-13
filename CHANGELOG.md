@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Discovery catalog entries include `group_by`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (configured default), and `freshness`, alongside existing `unit` and `supported_intervals`.
+- Optional registration options `group_by:` and `freshness:`. Defaults: breakdown metrics group by their `field`, other metrics `[]`; freshness derives from caching (`{ cached: true, max_age_seconds: }` or `{ cached: false }`). Existing registrations need no changes.
+- `RecordingStudioMetrics.discover(resource:)` and API catalog filter `filters[resource]`, using the same `filters` object as metric execution. Unknown catalog filters are rejected.
+
 ## [0.3.0] - 2026-10-13
 
 ### Added

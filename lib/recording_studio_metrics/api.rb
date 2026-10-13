@@ -69,7 +69,9 @@ module RecordingStudioMetrics
         handler: DiscoveryHandler,
         openapi: {
           summary: "List metrics available to the caller",
-          tags: ["Metrics"]
+          description: "Each entry includes unit, group_by, supported_intervals, date_range, timezone, and freshness.",
+          tags: ["Metrics"],
+          parameters: DiscoveryHandler::OPENAPI_PARAMETERS
         }
       )
 
@@ -120,27 +122,60 @@ module RecordingStudioMetrics
     end
 
     class DiscoveryHandler
+      FILTERS = %w[resource].freeze
+
+      OPENAPI_PARAMETERS = [
+        {
+          name: "filters",
+          in: "query",
+          required: false,
+          description: "Catalog filters. Supported: resource (filters[resource]=users). Unknown names are rejected.",
+          schema: {
+            type: "object",
+            properties: { resource: { type: "string" } },
+            additionalProperties: false
+          }
+        }
+      ].freeze
+
       def self.call(api_context)
         api = api_context.api_key
         metrics = []
+        resource_filter = requested_resource(api_context.params)
+        definitions = if resource_filter
+                        RecordingStudioMetrics.for_resource(resource_filter)
+                      else
+                        RecordingStudioMetrics.definitions
+                      end
 
-        RecordingStudioMetrics.definitions.group_by(&:resource).each do |resource, definitions|
-          exposed = definitions.select { |definition| definition.exposed_to_api?(api) }
+        definitions.group_by(&:resource).each do |resource, resource_definitions|
+          exposed = resource_definitions.select { |definition| definition.exposed_to_api?(api) }
           next if exposed.empty?
 
           context = Api.context_from_api(api_context, definition: exposed.first)
           next unless context
 
           metrics.concat(
-            RecordingStudioMetrics.discover(context: context, api: api).select do |row|
-              row[:resource] == resource
-            end
+            RecordingStudioMetrics.discover(context: context, api: api, resource: resource)
           )
         end
 
         { metrics: metrics }
       rescue Errors::Error => e
         Api.raise_mapped!(e)
+      end
+
+      # Catalog filters use the same `filters` object as metric execution.
+      # Returns the requested resource name, or nil when unfiltered.
+      def self.requested_resource(params)
+        raw = params[:filters] || {}
+        raise Errors::InvalidFilter, "filters must be an object" unless raw.respond_to?(:each_pair)
+
+        filters = raw.each_pair.to_h { |key, value| [key.to_s, value] }
+        unknown = filters.keys - FILTERS
+        raise Errors::InvalidFilter, "Unknown filters: #{unknown.join(', ')}" if unknown.any?
+
+        filters["resource"].presence&.to_s
       end
     end
 

@@ -35,7 +35,9 @@ module RecordingStudioMetrics
                 :grouping,
                 :semantics,
                 :value_field,
-                :cumulative
+                :cumulative,
+                :group_by,
+                :freshness
 
     def initialize(**attrs)
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
@@ -51,6 +53,7 @@ module RecordingStudioMetrics
       @measurement = (measurement || inferred_measurement).to_sym
       @grouping = grouping&.to_sym
       @unit ||= default_unit
+      @group_by = (group_by.nil? ? default_group_by : Array(group_by)).map(&:to_sym)
       validate!
     end
 
@@ -100,8 +103,21 @@ module RecordingStudioMetrics
         exposed_apis: exposed_apis,
         semantics: semantics,
         value_field: value_field,
-        cumulative: cumulative
+        cumulative: cumulative,
+        group_by: group_by,
+        freshness: freshness
       }.compact
+    end
+
+    # Discovery catalog entry: registration metadata plus runtime query rules
+    # (date range limits, default timezone, freshness). Kept out of #metadata so
+    # configuration changes do not alter #version or cache keys.
+    def catalog_metadata
+      metadata.merge(
+        date_range: date_range_metadata,
+        timezone: RecordingStudioMetrics.configuration.default_timezone,
+        freshness: freshness || default_freshness
+      )
     end
 
     private
@@ -121,6 +137,27 @@ module RecordingStudioMetrics
       when :custom then :custom
       else :count
       end
+    end
+
+    def default_group_by
+      metric_type == :breakdown ? [field] : []
+    end
+
+    def date_range_metadata
+      return { supported: false } unless result_type == :timeseries
+
+      config = RecordingStudioMetrics.configuration
+      {
+        supported: true,
+        max_period_seconds: config.max_reporting_period.to_i,
+        max_buckets: config.max_timeseries_buckets
+      }
+    end
+
+    def default_freshness
+      return { cached: false } unless Cache.cacheable?(self)
+
+      { cached: true, max_age_seconds: (cache_for || RecordingStudioMetrics.configuration.default_cache_ttl).to_i }
     end
 
     def default_unit

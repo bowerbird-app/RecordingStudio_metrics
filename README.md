@@ -93,9 +93,12 @@ RecordingStudioMetrics.definitions
 RecordingStudioMetrics.find("members.total")
 RecordingStudioMetrics.for_resource(:members)
 RecordingStudioMetrics.discover(context: context, api: :admin)
+RecordingStudioMetrics.discover(context: context, api: :admin, resource: :members)
 ```
 
-Discovery does not calculate. `discover(api:)` returns only metrics exposed to that named API.
+Discovery does not calculate. `discover(api:)` returns only metrics exposed to that named API. `resource:` limits the catalog to one resource; the API catalog takes `filters[resource]=members`.
+
+Each catalog entry includes `unit`, `group_by`, `supported_intervals`, `default_interval`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (the configured default; the `timezone` query param overrides it), and `freshness`. Registrations may set `group_by:` and `freshness:`; without them breakdowns group by `field`, other metrics by nothing, and freshness reflects cache settings.
 
 ## API integration
 

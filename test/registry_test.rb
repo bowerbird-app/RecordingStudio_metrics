@@ -11,10 +11,12 @@ class RegistryTest < Minitest::Test
 
   def setup
     RecordingStudioMetrics.registry.reset!
+    RecordingStudioMetrics.reset_configuration!
   end
 
   def teardown
     RecordingStudioMetrics.registry.reset!
+    RecordingStudioMetrics.reset_configuration!
   end
 
   def test_register_standard_and_custom_metrics
@@ -86,6 +88,55 @@ class RegistryTest < Minitest::Test
     refute metadata.key?(:value)
   end
 
+  def test_catalog_entries_expose_defaults_for_existing_registrations
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total
+      breakdown :by_country, field: :country
+      timeseries :registrations, field: :created_at, intervals: %i[day week]
+    end
+
+    entries = RecordingStudioMetrics.discover(context: catalog_context).to_h { |row| [row[:name], row] }
+
+    assert_equal "count", entries[:total][:unit]
+    assert_empty entries[:total][:group_by]
+    assert_equal [:country], entries[:by_country][:group_by]
+    assert_equal({ supported: false }, entries[:total][:date_range])
+    assert_equal true, entries[:registrations][:date_range][:supported]
+    assert_equal 366.days.to_i, entries[:registrations][:date_range][:max_period_seconds]
+    assert_equal 400, entries[:registrations][:date_range][:max_buckets]
+    assert_equal %i[day week], entries[:registrations][:supported_intervals]
+    assert_equal "UTC", entries[:total][:timezone]
+    assert_equal({ cached: true, max_age_seconds: 300 }, entries[:total][:freshness])
+  end
+
+  def test_catalog_entries_reflect_registration_and_configuration
+    RecordingStudioMetrics.configure { |config| config.default_timezone = "Asia/Manila" }
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, cache_for: 60
+      count :live, cacheable: false
+      sum :revenue, field: :amount, unit: "PHP", group_by: %i[plan], freshness: { updated: "nightly" }
+    end
+
+    entries = RecordingStudioMetrics.discover(context: catalog_context).to_h { |row| [row[:name], row] }
+
+    assert_equal "Asia/Manila", entries[:total][:timezone]
+    assert_equal({ cached: true, max_age_seconds: 60 }, entries[:total][:freshness])
+    assert_equal({ cached: false }, entries[:live][:freshness])
+    assert_equal "PHP", entries[:revenue][:unit]
+    assert_equal [:plan], entries[:revenue][:group_by]
+    assert_equal({ updated: "nightly" }, entries[:revenue][:freshness])
+  end
+
+  def test_discover_filters_by_resource
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) { count :total }
+    RecordingStudioMetrics.register(:members, model: ExampleRecord) { count :total }
+
+    rows = RecordingStudioMetrics.discover(context: catalog_context, resource: "users")
+    identifiers = rows.map { |row| row[:identifier] }
+    assert_equal ["users.total"], identifiers
+    assert_empty RecordingStudioMetrics.discover(context: catalog_context, resource: :missing)
+  end
+
   def test_registration_does_not_expose_api_access
     RecordingStudioMetrics.register(:users, model: ExampleRecord) do
       count :total
@@ -141,5 +192,11 @@ class RegistryTest < Minitest::Test
     end
 
     assert_equal %w[users.active users.total], RecordingStudioMetrics.definitions.map(&:identifier).sort
+  end
+
+  private
+
+  def catalog_context
+    RecordingStudioMetrics::Context.new(actor: :a, scope: :root, workspace_id: "ws-1")
   end
 end

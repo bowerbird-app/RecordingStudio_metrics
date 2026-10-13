@@ -65,12 +65,12 @@ module RecordingStudioMetrics
       registry.for_resource(resource)
     end
 
-    def discover(context: nil, api: nil)
+    def discover(context: nil, api: nil, resource: nil)
       return [] if context.nil?
 
-      catalog = definitions
+      catalog = resource.nil? ? definitions : for_resource(resource)
       catalog = catalog.select { |definition| definition.exposed_to_api?(api) } if api
-      catalog.select { |definition| Authorization.discoverable?(definition, context) }.map(&:metadata)
+      catalog.select { |definition| Authorization.discoverable?(definition, context) }.map(&:catalog_metadata)
     end
 
     def expose_to_api(identifier, api: :public)

@@ -159,7 +159,7 @@ class ApiAdapterTest < Minitest::Test
 
     captured = {}
     stub_result = RecordingStudioMetrics::Result.new(metric: "members.total", type: :scalar, value: 1)
-    execute = lambda do |_identifier, context:, **kwargs|
+    execute = lambda do |_identifier, **kwargs|
       captured = kwargs
       stub_result
     end
@@ -193,7 +193,7 @@ class ApiAdapterTest < Minitest::Test
 
     captured = {}
     stub_result = RecordingStudioMetrics::Result.new(metric: "members.total", type: :scalar, value: 1)
-    execute = lambda do |_identifier, context:, **kwargs|
+    execute = lambda do |_identifier, **kwargs|
       captured = kwargs
       stub_result
     end
@@ -201,7 +201,8 @@ class ApiAdapterTest < Minitest::Test
     value = "2026-03-01T00:00:00Z"
     RecordingStudioMetrics.stub(:execute, execute) do
       RecordingStudioMetrics::Api::ExecuteHandler.call(
-        api_context(resource: "members", name: "total", params: { start: value, from: value, end: "2026-04-01T00:00:00Z" })
+        api_context(resource: "members", name: "total",
+                    params: { start: value, from: value, end: "2026-04-01T00:00:00Z" })
       )
     end
 
@@ -249,7 +250,7 @@ class ApiAdapterTest < Minitest::Test
 
     captured = {}
     stub_result = RecordingStudioMetrics::Result.new(metric: "members.total", type: :scalar, value: 1)
-    execute = lambda do |_identifier, context:, **kwargs|
+    execute = lambda do |_identifier, **kwargs|
       captured = kwargs
       stub_result
     end
@@ -274,6 +275,54 @@ class ApiAdapterTest < Minitest::Test
 
     error = RecordingStudioMetrics::Errors::UnknownMetric.new("x")
     assert_same error, RecordingStudioMetrics::Api.map_to_api_error(error)
+  end
+
+  def test_discovery_filters_catalog_by_resource
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
+    RecordingStudioMetrics.register(:members, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    handler = RecordingStudioMetrics::Api::DiscoveryHandler
+    filtered = handler.call(api_context(params: { filters: { resource: "users" } }))
+    unfiltered = handler.call(api_context)
+
+    assert_equal(["users.total"], filtered[:metrics].map { |row| row[:identifier] })
+    assert_equal %w[members.total users.total], unfiltered[:metrics].map { |row| row[:identifier] }.sort
+  end
+
+  def test_discovery_resource_filter_for_unknown_resource_is_empty
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    context = api_context(params: { filters: { "resource" => "nope" } })
+    payload = RecordingStudioMetrics::Api::DiscoveryHandler.call(context)
+    assert_empty payload[:metrics]
+  end
+
+  def test_discovery_rejects_unknown_catalog_filters
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    error = assert_raises(RecordingStudioMetrics::Errors::InvalidFilter) do
+      RecordingStudioMetrics::Api::DiscoveryHandler.call(api_context(params: { filters: { country: "PH" } }))
+    end
+    assert_includes error.message, "country"
+  end
+
+  def test_discovery_entries_include_catalog_fields
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
+
+    row = RecordingStudioMetrics::Api::DiscoveryHandler.call(api_context)[:metrics].first
+    %i[unit group_by supported_intervals date_range timezone freshness].each do |key|
+      assert row.key?(key), "expected catalog entry to include #{key}"
+    end
   end
 
   private
