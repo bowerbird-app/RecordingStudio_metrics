@@ -6,14 +6,16 @@ module RecordingStudioMetrics
       new(identifier, context: context, **params).call
     end
 
-    def initialize(identifier, context:, interval: nil, start_at: nil, end_at: nil, filters: {}, cache: true)
+    def initialize(identifier, context:, interval: nil, start_at: nil, end_at: nil, filters: {}, group_by: nil,
+                   cache: true)
       @identifier = identifier.to_s
       @context = context
       @params = {
         interval: interval,
         start_at: start_at,
         end_at: end_at,
-        filters: filters || {}
+        filters: filters || {},
+        group_by: group_by.presence&.to_s
       }
       @use_cache = cache
     end

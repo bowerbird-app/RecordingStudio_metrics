@@ -6,13 +6,7 @@ module RecordingStudioMetrics
       def calculate
         interval = resolved_interval
         window = build_window(interval)
-        grouped = aggregate(window)
-        fill = fill_missing?(definition.measurement)
-        data = window.buckets.map do |bucket|
-          value = grouped[bucket_key(bucket, window)]
-          value = numeric_or_zero(value) if fill
-          { date: window.format(bucket), value: value }
-        end
+        data = series(window, aggregate(window))
 
         result(
           data: data,
@@ -20,11 +14,50 @@ module RecordingStudioMetrics
             interval: interval,
             period: window.period_metadata,
             semantics: definition.semantics || "records_created_during_period"
-          }
+          },
+          grouping: group_field ? grouped_series(window) : {}
         )
       end
 
       private
+
+      def series(window, values)
+        fill = fill_missing?(definition.measurement)
+        window.buckets.map do |bucket|
+          value = values[bucket_key(bucket, window)]
+          value = numeric_or_zero(value) if fill
+          { date: window.format(bucket), value: value }
+        end
+      end
+
+      # Splits created-during-period buckets by group_field. The min group size is
+      # applied to each group's row count across the whole requested period.
+      def grouped_series(window)
+        rel = filtered_relation.where(definition.field => period_range(window))
+        kept, small = split_groups(rel.group(group_field).distinct.count)
+        cells = rel.group(Arel.sql(truncation_sql(window)), group_field)
+        values = index_cells(measure(cells), window)
+        counts = definition.measurement == :average ? index_cells(cells.distinct.count, window) : values
+
+        groups = kept.map { |key| { key: key, data: series(window, values.transform_values { |row| row[key] }) } }
+        other = merged_series(window, values, counts, small) if small.any?
+        grouping(groups, other)
+      end
+
+      def merged_series(window, values, counts, keys)
+        merged = values.to_h do |bucket, row|
+          present = keys.select { |key| row.key?(key) }
+          [bucket, present.empty? ? nil : merge_values(row, counts[bucket], present)]
+        end
+        { groups: keys.size, data: series(window, merged) }
+      end
+
+      def index_cells(rows, window)
+        rows.each_with_object({}) do |((bucket, key), value), memo|
+          formatted = window.format(coerce_bucket_time(bucket, window))
+          (memo[formatted] ||= {})[key] = coerce_aggregate(value)
+        end
+      end
 
       def resolved_interval
         interval = (params[:interval] || definition.default_interval || definition.intervals.first)&.to_sym
@@ -47,14 +80,9 @@ module RecordingStudioMetrics
       end
 
       def aggregate(window)
-        return population_at_end(window) if population_at_end?
+        return population_at_end(window) if definition.population_at_end?
 
         created_during_period(window)
-      end
-
-      def population_at_end?
-        semantics = definition.semantics.to_s
-        definition.cumulative == true || semantics == "population_at_end_of_period"
       end
 
       def created_during_period(window)

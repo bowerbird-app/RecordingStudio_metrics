@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Discovery catalog entries include `group_by`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (configured default), and `freshness`, alongside existing `unit` and `supported_intervals`.
+- Optional registration options `group_by:` and `freshness:`. Defaults: `group_by` is `[]`; freshness derives from caching (`{ cached: true, max_age_seconds: }` or `{ cached: false }`). Existing registrations need no changes.
+- `RecordingStudioMetrics.discover(resource:)` and API catalog filter `filters[resource]`, using the same `filters` object as metric execution. Unknown catalog filters are rejected.
+- `group_by` execute option (Ruby `execute(group_by:)`, API `group_by` query param, documented in OpenAPI). Values must be in the metric's catalog `group_by` list; others raise `RecordingStudioMetrics::Errors::InvalidGroupBy` (422 on the API). Supported on count, sum, average, and created-during-period time series, together with `from`/`to`/`interval` and filters. Registering `group_by:` on breakdown, custom, or population-at-end time series raises `ArgumentError`.
+- Grouped results keep the ungrouped `value`/`data` total and add `group_by`, `groups` (`[{ key:, value: }]` or `[{ key:, data: }]`), and `other`.
+- Minimum group size: groups with fewer rows than `config.min_group_size` (default 5, per-metric `min_group_size:`) are merged into an unlabeled `other` bucket (`{ groups:, value: }` or `{ groups:, data: }`), so kept groups plus `other` add up to the total. The effective threshold appears in the catalog as `min_group_size`.
+
+## [0.3.0] - 2026-10-13
+
+### Added
+- Metric query params accept `from` as an alias for `start` and `to` as an alias for `end` (API execute endpoint and OpenAPI catalog).
+- When both forms are provided with different values, raises `RecordingStudioMetrics::Errors::InvalidDateRange`. Matching values are accepted. Existing `start`/`end` and legacy `start_at`/`end_at` behaviour is unchanged.
+
 ## [0.2.2] - 2026-10-09
 
 ### Fixed
@@ -44,7 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.1...v0.2.2
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/releases/tag/v0.1.0

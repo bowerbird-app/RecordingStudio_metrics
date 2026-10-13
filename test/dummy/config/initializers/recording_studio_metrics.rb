@@ -18,7 +18,7 @@ module DummyMetricsCatalog
     scope_attribute: :workspace_id,
     blast_radius: :root
   ) do
-    count :total, title: "Total members", expose: { api: [:admin] }
+    count :total, title: "Total members", group_by: %i[country status], expose: { api: [:admin] }
 
     count :active,
           title: "Active members",
@@ -34,6 +34,7 @@ module DummyMetricsCatalog
                intervals: %i[hour day week month year],
                default_interval: :month,
                preferred_chart: :line,
+               group_by: %i[country status],
                title: "Member registrations" do
       filter :status, field: :status, type: :enum, options: %w[active invited suspended]
       filter :verified, field: :verified, type: :boolean
@@ -63,7 +64,7 @@ module DummyMetricsCatalog
   ) do
     count :total, title: "Total projects"
     sum :storage_used, field: :storage_bytes, title: "Storage used", unit: "bytes"
-    average :storage, field: :storage_bytes, title: "Average project storage"
+    average :storage, field: :storage_bytes, group_by: [:completed], title: "Average project storage"
 
     breakdown :storage_by_completed,
               field: :completed,

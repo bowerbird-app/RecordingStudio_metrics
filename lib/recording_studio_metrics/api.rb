@@ -21,15 +21,37 @@ module RecordingStudioMetrics
         name: "start",
         in: "query",
         required: false,
-        description: "Inclusive period start (ISO-8601). Alias: start_at.",
+        description: "Inclusive period start (ISO-8601). Aliases: start_at, from.",
+        schema: { type: "string", format: "date-time" }
+      },
+      {
+        name: "from",
+        in: "query",
+        required: false,
+        description: "Alias for start. Must match start when both are provided.",
         schema: { type: "string", format: "date-time" }
       },
       {
         name: "end",
         in: "query",
         required: false,
-        description: "Exclusive period end (ISO-8601). Alias: end_at.",
+        description: "Exclusive period end (ISO-8601). Aliases: end_at, to.",
         schema: { type: "string", format: "date-time" }
+      },
+      {
+        name: "to",
+        in: "query",
+        required: false,
+        description: "Alias for end. Must match end when both are provided.",
+        schema: { type: "string", format: "date-time" }
+      },
+      {
+        name: "group_by",
+        in: "query",
+        required: false,
+        description: "Split results by one of the metric's catalog group_by columns. Groups below " \
+                     "min_group_size rows are merged into `other`. Unsupported values are rejected.",
+        schema: { type: "string" }
       },
       {
         name: "timezone",
@@ -55,7 +77,9 @@ module RecordingStudioMetrics
         handler: DiscoveryHandler,
         openapi: {
           summary: "List metrics available to the caller",
-          tags: ["Metrics"]
+          description: "Each entry includes unit, group_by, supported_intervals, date_range, timezone, and freshness.",
+          tags: ["Metrics"],
+          parameters: DiscoveryHandler::OPENAPI_PARAMETERS
         }
       )
 
@@ -106,27 +130,60 @@ module RecordingStudioMetrics
     end
 
     class DiscoveryHandler
+      FILTERS = %w[resource].freeze
+
+      OPENAPI_PARAMETERS = [
+        {
+          name: "filters",
+          in: "query",
+          required: false,
+          description: "Catalog filters. Supported: resource (filters[resource]=users). Unknown names are rejected.",
+          schema: {
+            type: "object",
+            properties: { resource: { type: "string" } },
+            additionalProperties: false
+          }
+        }
+      ].freeze
+
       def self.call(api_context)
         api = api_context.api_key
         metrics = []
+        resource_filter = requested_resource(api_context.params)
+        definitions = if resource_filter
+                        RecordingStudioMetrics.for_resource(resource_filter)
+                      else
+                        RecordingStudioMetrics.definitions
+                      end
 
-        RecordingStudioMetrics.definitions.group_by(&:resource).each do |resource, definitions|
-          exposed = definitions.select { |definition| definition.exposed_to_api?(api) }
+        definitions.group_by(&:resource).each do |resource, resource_definitions|
+          exposed = resource_definitions.select { |definition| definition.exposed_to_api?(api) }
           next if exposed.empty?
 
           context = Api.context_from_api(api_context, definition: exposed.first)
           next unless context
 
           metrics.concat(
-            RecordingStudioMetrics.discover(context: context, api: api).select do |row|
-              row[:resource] == resource
-            end
+            RecordingStudioMetrics.discover(context: context, api: api, resource: resource)
           )
         end
 
         { metrics: metrics }
       rescue Errors::Error => e
         Api.raise_mapped!(e)
+      end
+
+      # Catalog filters use the same `filters` object as metric execution.
+      # Returns the requested resource name, or nil when unfiltered.
+      def self.requested_resource(params)
+        raw = params[:filters] || {}
+        raise Errors::InvalidFilter, "filters must be an object" unless raw.respond_to?(:each_pair)
+
+        filters = raw.each_pair.to_h { |key, value| [key.to_s, value] }
+        unknown = filters.keys - FILTERS
+        raise Errors::InvalidFilter, "Unknown filters: #{unknown.join(', ')}" if unknown.any?
+
+        filters["resource"].presence&.to_s
       end
     end
 
@@ -146,14 +203,30 @@ module RecordingStudioMetrics
           identifier,
           context: context,
           interval: api_context.params[:interval],
-          start_at: api_context.params[:start] || api_context.params[:start_at],
-          end_at: api_context.params[:end] || api_context.params[:end_at],
-          filters: api_context.params[:filters] || {}
+          start_at: Api.period_bound(api_context.params, primary: :start, alias_key: :from, legacy: :start_at),
+          end_at: Api.period_bound(api_context.params, primary: :end, alias_key: :to, legacy: :end_at),
+          filters: api_context.params[:filters] || {},
+          group_by: api_context.params[:group_by]
         )
         result.as_json
       rescue Errors::Error => e
         Api.raise_mapped!(e)
       end
+    end
+
+    # Resolve start/end query bounds. `from` aliases `start` and `to` aliases `end`.
+    # Conflicting primary+alias values raise InvalidDateRange; matching values are accepted.
+    # Legacy start_at/end_at remain fallbacks when neither primary nor alias is present.
+    def period_bound(params, primary:, alias_key:, legacy:)
+      primary_value = params[primary]
+      alias_value = params[alias_key]
+
+      if !primary_value.nil? && !alias_value.nil? && primary_value != alias_value
+        raise Errors::InvalidDateRange,
+              "#{primary} and #{alias_key} must match when both are provided"
+      end
+
+      primary_value || alias_value || params[legacy]
     end
   end
 end

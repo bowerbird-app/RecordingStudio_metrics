@@ -24,6 +24,7 @@ module RecordingStudioMetrics
       end
 
       def call
+        group_field
         calculate
       rescue Errors::Error
         raise
@@ -64,7 +65,43 @@ module RecordingStudioMetrics
         value.nil? ? 0 : value
       end
 
-      def result(value: nil, data: nil, extra: {})
+      # The requested group_by column, validated against the metric's catalog list.
+      def group_field
+        return @group_field if defined?(@group_field)
+
+        requested = params[:group_by]
+        @group_field = nil
+        return if requested.blank?
+
+        @group_field = definition.group_by.find { |column| column.to_s == requested.to_s }
+        raise Errors::InvalidGroupBy, "Unsupported group_by #{requested}" unless @group_field
+
+        @group_field
+      end
+
+      # Splits group keys by row count. Groups below the minimum size are merged
+      # into one unlabeled "other" bucket so small groups cannot be singled out.
+      def split_groups(counts)
+        threshold = definition.effective_min_group_size.to_i
+        kept, small = counts.keys.partition { |key| counts[key] >= threshold }
+        [kept.sort_by(&:to_s), small]
+      end
+
+      # Combined value for merged groups. Count and sum add up; average is weighted by row count.
+      def merge_values(values, counts, keys)
+        return keys.sum { |key| numeric_or_zero(values[key]) } unless definition.measurement == :average
+
+        rows = keys.sum { |key| counts[key].to_i }
+        return if rows.zero?
+
+        keys.sum { |key| values[key].to_f * counts[key].to_i } / rows
+      end
+
+      def grouping(groups, other)
+        { group_by: group_field, groups: groups, other: other }
+      end
+
+      def result(value: nil, data: nil, extra: {}, grouping: {})
         Result.new(
           metric: definition.identifier,
           type: definition.result_type,
@@ -78,7 +115,8 @@ module RecordingStudioMetrics
           period: extra[:period],
           interval: extra[:interval],
           calculated_at: Time.current,
-          metadata: extra.except(:period, :interval)
+          metadata: extra.except(:period, :interval),
+          **grouping
         )
       end
     end

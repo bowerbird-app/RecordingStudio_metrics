@@ -2,10 +2,15 @@
 
 module RecordingStudioMetrics
   module Calculators
-    class Average < Base
-      def calculate
-        value = filtered_relation.average(definition.field)
-        result(value: value&.to_f)
+    class Average < Scalar
+      private
+
+      def aggregate(scope)
+        scope.average(definition.field)
+      end
+
+      def coerce(value)
+        value&.to_f
       end
     end
   end

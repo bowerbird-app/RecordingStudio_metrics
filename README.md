@@ -93,9 +93,23 @@ RecordingStudioMetrics.definitions
 RecordingStudioMetrics.find("members.total")
 RecordingStudioMetrics.for_resource(:members)
 RecordingStudioMetrics.discover(context: context, api: :admin)
+RecordingStudioMetrics.discover(context: context, api: :admin, resource: :members)
 ```
 
-Discovery does not calculate. `discover(api:)` returns only metrics exposed to that named API.
+Discovery does not calculate. `discover(api:)` returns only metrics exposed to that named API. `resource:` limits the catalog to one resource; the API catalog takes `filters[resource]=members`.
+
+Each catalog entry includes `unit`, `group_by`, `supported_intervals`, `default_interval`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (the configured default; the `timezone` query param overrides it), and `freshness`. Registrations may set `group_by:`, `min_group_size:`, and `freshness:`. Without them `group_by` is empty and freshness reflects cache settings.
+
+## Grouping
+
+```ruby
+count :total, group_by: %i[country status]
+RecordingStudioMetrics.execute("members.total", context: context, group_by: "country")
+```
+
+`group_by` (API query param of the same name) must be one of the metric's catalog `group_by` columns, otherwise `InvalidGroupBy` (422). It works on count, sum, average, and created-during-period time series, with `from`/`to`/`interval` and filters. The result keeps the ungrouped `value` or `data` and adds `group_by`, `groups` (`[{ key:, value: }]`, or `[{ key:, data: [...] }]` for time series), and `other`.
+
+Privacy: groups with fewer rows than `config.min_group_size` (default 5; per-metric `min_group_size:`) are merged into `other` (`{ groups: <merged group count>, value: }` or `{ groups:, data: }`) without their keys. Count and sum merge by addition and average by row-weighted mean, so kept groups plus `other` equal the total. For time series the threshold uses each group's rows across the whole requested period.
 
 ## API integration
 
@@ -107,6 +121,8 @@ RecordingStudioMetrics::Api.register!(api: :admin)
 ```
 
 Handlers only call `discover` / `execute` and raise RS_API error classes for 404 / 403 / 422. See `docs/companion-changes.md` for remaining companion hooks.
+
+Execute query params: `filters`, `interval`, `start` (aliases: `from`, `start_at`), `end` (aliases: `to`, `end_at`), `timezone`. If `start` and `from` (or `end` and `to`) are both provided with different values, the request fails with `InvalidDateRange`.
 
 Site-wide models (no workspace column) stay denied over the API unless the owning gem passes its own access check at registration:
 

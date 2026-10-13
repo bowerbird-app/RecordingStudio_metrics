@@ -35,7 +35,10 @@ module RecordingStudioMetrics
                 :grouping,
                 :semantics,
                 :value_field,
-                :cumulative
+                :cumulative,
+                :group_by,
+                :freshness,
+                :min_group_size
 
     def initialize(**attrs)
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
@@ -51,6 +54,7 @@ module RecordingStudioMetrics
       @measurement = (measurement || inferred_measurement).to_sym
       @grouping = grouping&.to_sym
       @unit ||= default_unit
+      @group_by = (group_by.nil? ? default_group_by : Array(group_by)).map(&:to_sym)
       validate!
     end
 
@@ -100,8 +104,30 @@ module RecordingStudioMetrics
         exposed_apis: exposed_apis,
         semantics: semantics,
         value_field: value_field,
-        cumulative: cumulative
+        cumulative: cumulative,
+        group_by: group_by,
+        freshness: freshness,
+        min_group_size: min_group_size
       }.compact
+    end
+
+    # Discovery catalog entry: registration metadata plus runtime query rules
+    # (date range limits, default timezone, freshness). Kept out of #metadata so
+    # configuration changes do not alter #version or cache keys.
+    def catalog_metadata
+      metadata.merge(
+        date_range: date_range_metadata,
+        timezone: RecordingStudioMetrics.configuration.default_timezone,
+        freshness: freshness || default_freshness
+      ).merge(group_by.any? ? { min_group_size: effective_min_group_size } : {})
+    end
+
+    def effective_min_group_size
+      min_group_size || RecordingStudioMetrics.configuration.min_group_size
+    end
+
+    def population_at_end?
+      cumulative == true || semantics.to_s == "population_at_end_of_period"
     end
 
     private
@@ -123,6 +149,27 @@ module RecordingStudioMetrics
       end
     end
 
+    def default_group_by
+      []
+    end
+
+    def date_range_metadata
+      return { supported: false } unless result_type == :timeseries
+
+      config = RecordingStudioMetrics.configuration
+      {
+        supported: true,
+        max_period_seconds: config.max_reporting_period.to_i,
+        max_buckets: config.max_timeseries_buckets
+      }
+    end
+
+    def default_freshness
+      return { cached: false } unless Cache.cacheable?(self)
+
+      { cached: true, max_age_seconds: (cache_for || RecordingStudioMetrics.configuration.default_cache_ttl).to_i }
+    end
+
     def default_unit
       measurement == :count ? "count" : nil
     end
@@ -136,9 +183,15 @@ module RecordingStudioMetrics
       raise ArgumentError, "Unsupported intervals #{unknown_intervals}" if unknown_intervals.any?
 
       raise ArgumentError, "#{metric_type} metrics require a field" if field_required? && field.nil?
+      raise ArgumentError, "#{identifier} does not support group_by" if group_by.any? && !groupable?
+
       return unless numeric_measurement? && value_field.nil?
 
       raise ArgumentError, "#{metric_type} #{measurement} metrics require a value_field"
+    end
+
+    def groupable?
+      %i[count sum average].include?(metric_type) || (metric_type == :timeseries && !population_at_end?)
     end
 
     def field_required?

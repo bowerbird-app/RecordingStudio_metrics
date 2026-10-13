@@ -2,9 +2,15 @@
 
 module RecordingStudioMetrics
   module Calculators
-    class Sum < Base
-      def calculate
-        result(value: numeric_or_zero(filtered_relation.sum(definition.field)))
+    class Sum < Scalar
+      private
+
+      def aggregate(scope)
+        scope.sum(definition.field)
+      end
+
+      def coerce(value)
+        numeric_or_zero(value)
       end
     end
   end

@@ -14,7 +14,10 @@ module RecordingStudioMetrics
                 :period,
                 :interval,
                 :calculated_at,
-                :metadata
+                :metadata,
+                :group_by,
+                :groups,
+                :other
 
     def initialize(
       metric:,
@@ -29,7 +32,10 @@ module RecordingStudioMetrics
       period: nil,
       interval: nil,
       calculated_at: Time.current,
-      metadata: {}
+      metadata: {},
+      group_by: nil,
+      groups: nil,
+      other: nil
     )
       @metric = metric
       @type = type.to_sym
@@ -44,6 +50,9 @@ module RecordingStudioMetrics
       @interval = interval
       @calculated_at = calculated_at
       @metadata = metadata
+      @group_by = group_by
+      @groups = groups
+      @other = other
     end
 
     def as_json(*)
@@ -58,7 +67,10 @@ module RecordingStudioMetrics
         period: period,
         interval: interval,
         calculated_at: calculated_at&.iso8601,
-        metadata: metadata
+        metadata: metadata,
+        group_by: group_by,
+        groups: groups,
+        other: other
       }
       if type == :scalar
         payload[:value] = value
