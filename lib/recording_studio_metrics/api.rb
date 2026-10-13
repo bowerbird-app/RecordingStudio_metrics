@@ -21,14 +21,28 @@ module RecordingStudioMetrics
         name: "start",
         in: "query",
         required: false,
-        description: "Inclusive period start (ISO-8601). Alias: start_at.",
+        description: "Inclusive period start (ISO-8601). Aliases: start_at, from.",
+        schema: { type: "string", format: "date-time" }
+      },
+      {
+        name: "from",
+        in: "query",
+        required: false,
+        description: "Alias for start. Must match start when both are provided.",
         schema: { type: "string", format: "date-time" }
       },
       {
         name: "end",
         in: "query",
         required: false,
-        description: "Exclusive period end (ISO-8601). Alias: end_at.",
+        description: "Exclusive period end (ISO-8601). Aliases: end_at, to.",
+        schema: { type: "string", format: "date-time" }
+      },
+      {
+        name: "to",
+        in: "query",
+        required: false,
+        description: "Alias for end. Must match end when both are provided.",
         schema: { type: "string", format: "date-time" }
       },
       {
@@ -146,14 +160,29 @@ module RecordingStudioMetrics
           identifier,
           context: context,
           interval: api_context.params[:interval],
-          start_at: api_context.params[:start] || api_context.params[:start_at],
-          end_at: api_context.params[:end] || api_context.params[:end_at],
+          start_at: Api.period_bound(api_context.params, primary: :start, alias_key: :from, legacy: :start_at),
+          end_at: Api.period_bound(api_context.params, primary: :end, alias_key: :to, legacy: :end_at),
           filters: api_context.params[:filters] || {}
         )
         result.as_json
       rescue Errors::Error => e
         Api.raise_mapped!(e)
       end
+    end
+
+    # Resolve start/end query bounds. `from` aliases `start` and `to` aliases `end`.
+    # Conflicting primary+alias values raise InvalidDateRange; matching values are accepted.
+    # Legacy start_at/end_at remain fallbacks when neither primary nor alias is present.
+    def period_bound(params, primary:, alias_key:, legacy:)
+      primary_value = params[primary]
+      alias_value = params[alias_key]
+
+      if !primary_value.nil? && !alias_value.nil? && primary_value != alias_value
+        raise Errors::InvalidDateRange,
+              "#{primary} and #{alias_key} must match when both are provided"
+      end
+
+      primary_value || alias_value || params[legacy]
     end
   end
 end

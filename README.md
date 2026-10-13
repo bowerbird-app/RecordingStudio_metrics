@@ -108,6 +108,8 @@ RecordingStudioMetrics::Api.register!(api: :admin)
 
 Handlers only call `discover` / `execute` and raise RS_API error classes for 404 / 403 / 422. See `docs/companion-changes.md` for remaining companion hooks.
 
+Execute query params: `filters`, `interval`, `start` (aliases: `from`, `start_at`), `end` (aliases: `to`, `end_at`), `timezone`. If `start` and `from` (or `end` and `to`) are both provided with different values, the request fails with `InvalidDateRange`.
+
 Site-wide models (no workspace column) stay denied over the API unless the owning gem passes its own access check at registration:
 
 ```ruby
