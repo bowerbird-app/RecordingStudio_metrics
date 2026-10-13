@@ -2,16 +2,16 @@
 
 RecordingStudioMetrics integrates only through extension points the companion gems already expose. This run does not open PRs on those repositories.
 
-## RecordingStudio_api (v0.6.7)
+## RecordingStudio_api (v0.7.0)
 
-Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422.
+Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422. The dummy pin is GitHub tag `v0.7.0` (Trashable query-only keep/trash checks; no API migration).
 
-1. Dispatch registered endpoints by HTTP verb as well as path. **Done in RS_API v0.6.7** (`registered_endpoint_request_match` uses `match(path:, http_verb:)`). Metrics stays GET-only by registration, not because the dispatcher ignores the verb.
+1. Dispatch registered endpoints by HTTP verb as well as path. **Done in RS_API v0.6.7+** (`registered_endpoint_request_match` uses `match(path:, http_verb:)`). Metrics stays GET-only by registration, not because the dispatcher ignores the verb.
 
 Needed from the API gem:
 
 2. Optional: a documented hook to attach OpenAPI query parameters for filters/interval/start/end without putting that logic in each handler. (This gem currently passes an `openapi[:parameters]` array on the execute endpoint.)
-3. Optional: `RegisteredEndpointsController` support for handler `{ json:, status: }` results. v0.6.7 still `render json:` only; status codes currently require raising the API error classes above.
+3. Optional: `RegisteredEndpointsController` support for handler `{ json:, status: }` results. Status codes currently require raising the API error classes above.
 
 ## RecordingStudio_admin (v2.2.0)
 
