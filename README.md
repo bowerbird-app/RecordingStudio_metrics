@@ -4,7 +4,7 @@ Shared metrics and analytics for Recording Studio recordables and ordinary Activ
 
 This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic.
 
-Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.6.0`, Accessible dummy GitHub tag `v0.17.0`, Root Switchable dummy GitHub tag `v0.9.0`, API dummy GitHub tag `v0.7.0`, Admin dummy GitHub tag `v2.3.0`, Trashable dummy GitHub tag `v0.10.0` (`require: false`), Cache dummy GitHub tag `v0.5.0`, FlatPack dummy GitHub tag `v0.1.209`.
+Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.6.0`, Accessible dummy GitHub tag `v0.18.0`, Root Switchable dummy GitHub tag `v0.9.0`, API dummy GitHub tag `v0.7.0`, Admin dummy GitHub tag `v2.3.0`, Trashable dummy GitHub tag `v0.10.0` (`require: false`), Cache dummy GitHub tag `v0.5.0`, FlatPack dummy GitHub tag `v0.1.209`.
 
 ## Architecture
 
