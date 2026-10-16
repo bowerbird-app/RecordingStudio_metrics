@@ -38,7 +38,8 @@ module RecordingStudioMetrics
                 :cumulative,
                 :group_by,
                 :freshness,
-                :min_group_size
+                :min_group_size,
+                :labels
 
     def initialize(**attrs)
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
@@ -184,6 +185,8 @@ module RecordingStudioMetrics
 
       raise ArgumentError, "#{metric_type} metrics require a field" if field_required? && field.nil?
       raise ArgumentError, "#{identifier} does not support group_by" if group_by.any? && !groupable?
+      raise ArgumentError, "labels must be callable" unless labels.nil? || labels.respond_to?(:call)
+      raise ArgumentError, "#{identifier} does not support labels" if labels && !labelable?
 
       return unless numeric_measurement? && value_field.nil?
 
@@ -192,6 +195,10 @@ module RecordingStudioMetrics
 
     def groupable?
       %i[count sum average].include?(metric_type) || (metric_type == :timeseries && !population_at_end?)
+    end
+
+    def labelable?
+      metric_type == :breakdown || (groupable? && group_by.any?)
     end
 
     def field_required?

@@ -34,4 +34,4 @@ Needed from the Cache gem:
 
 ## Recording Studio core
 
-No core change is required to register metrics. Recordable-owning gems call `RecordingStudioMetrics.register` from their own initializers.
+No core change is required to register metrics. Recordable-owning gems call `RecordingStudioMetrics.register` from their own initializers. When a grouped metric's keys are opaque (ids, UUIDs), the owning gem passes `labels:` on that definition. Follow-up work in gems such as RecordingStudio_terms_and_conditions adopts this hook. Metrics does not resolve those records itself.

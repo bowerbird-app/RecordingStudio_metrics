@@ -109,6 +109,15 @@ RecordingStudioMetrics.execute("members.total", context: context, group_by: "cou
 
 `group_by` (API query param of the same name) must be one of the metric's catalog `group_by` columns, otherwise `InvalidGroupBy` (422). It works on count, sum, average, and created-during-period time series, with `from`/`to`/`interval` and filters. The result keeps the ungrouped `value` or `data` and adds `group_by`, `groups` (`[{ key:, value: }]`, or `[{ key:, data: [...] }]` for time series), and `other`.
 
+Pass `labels:` when a group key needs a display name. The callable receives the kept values and the grouped column, and returns a Hash of raw value to string. Each row is matched on the raw value, then on that value as a string. Breakdown `data` rows and `groups` rows include `label` next to `key` when the string is present. Leave a value out, or return a blank string, and that row has no `label`. Metrics does not query other tables. Without `labels:`, the row hashes stay the same. `other` has no `label`. `labels:` is accepted on a breakdown, and on a count, sum, average, or created-during-period time series that declares `group_by:`. Any other metric raises `ArgumentError` at registration.
+
+```ruby
+breakdown :by_version,
+          field: :terms_version_id,
+          labels: ->(values, _column) { Version.where(id: values).pluck(:id, :title).to_h }
+# [{ key: "a1-uuid", label: "v2.1", value: 12 }, { key: "b2-uuid", value: 4 }]
+```
+
 Privacy: groups with fewer rows than `config.min_group_size` (default 5; per-metric `min_group_size:`) are merged into `other` (`{ groups: <merged group count>, value: }` or `{ groups:, data: }`) without their keys. Count and sum merge by addition and average by row-weighted mean, so kept groups plus `other` equal the total. For time series the threshold uses each group's rows across the whole requested period.
 
 ## API integration

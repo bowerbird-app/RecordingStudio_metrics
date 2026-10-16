@@ -9,7 +9,10 @@ module RecordingStudioMetrics
 
         grouped = filtered_relation.group(field)
         values = aggregate_values(grouped)
-        data = values.map { |key, value| { key: key, value: coerce(value) } }.sort_by { |row| row[:key].to_s }
+        data = labeled_rows(
+          values.map { |key, value| { key: key, value: coerce(value) } }.sort_by { |row| row[:key].to_s },
+          field
+        )
         result(data: data)
       end
 

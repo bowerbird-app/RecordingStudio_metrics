@@ -98,7 +98,37 @@ module RecordingStudioMetrics
       end
 
       def grouping(groups, other)
-        { group_by: group_field, groups: groups, other: other }
+        { group_by: group_field, groups: labeled_rows(groups, group_field), other: other }
+      end
+
+      def labeled_rows(rows, column)
+        return rows if definition.labels.nil?
+
+        names = definition.labels.call(rows.map { |row| row[:key] }, column)
+        raise Errors::CalculationError, "labels must return a Hash" unless names.is_a?(Hash)
+
+        rows.map { |row| with_label(row, names) }
+      rescue Errors::Error, ActiveRecord::ActiveRecordError
+        raise
+      rescue StandardError => e
+        raise Errors::CalculationError, e.message
+      end
+
+      def with_label(row, names)
+        label = label_for(names, row[:key])
+        return row if label.nil?
+
+        { key: row[:key], label: label }.merge(row.except(:key))
+      end
+
+      def label_for(names, key)
+        [key, key.to_s].uniq.each do |candidate|
+          next unless names.key?(candidate)
+
+          found = names[candidate]
+          return found.to_s unless found.blank?
+        end
+        nil
       end
 
       def result(value: nil, data: nil, extra: {}, grouping: {})
