@@ -192,6 +192,27 @@ class MetricsGroupLabelsTest < ActiveSupport::TestCase
     refute result.other.key?(:label)
   end
 
+  test "labels is called once when every group is merged into other" do
+    calls = []
+    RecordingStudioMetrics.register(
+      :label_empty,
+      model: Member,
+      scope_attribute: :workspace_id,
+      blast_radius: :root
+    ) do
+      count :total, group_by: [:country], min_group_size: 100, labels: lambda { |values, column|
+        calls << [values, column]
+        {}
+      }
+    end
+
+    result = execute("label_empty.total", group_by: "country")
+
+    assert_equal [[[], :country]], calls
+    assert_empty result.groups
+    refute result.other.key?(:label)
+  end
+
   test "dummy labelled breakdown uses the country names" do
     result = execute("members.by_country_labelled")
     by_key = result.data.to_h { |row| [row[:key], row[:label]] }

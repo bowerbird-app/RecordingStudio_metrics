@@ -102,7 +102,7 @@ module RecordingStudioMetrics
       end
 
       def labeled_rows(rows, column)
-        return rows if definition.labels.nil? || rows.blank?
+        return rows if definition.labels.nil?
 
         names = definition.labels.call(rows.map { |row| row[:key] }, column)
         raise Errors::CalculationError, "labels must return a Hash" unless names.is_a?(Hash)

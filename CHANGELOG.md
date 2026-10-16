@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Optional `labels:` callable on a metric. Execute calls it once with the kept group values and the grouped column. The callable returns a Hash of raw value to string. Breakdown `data` rows and `group_by` `groups` rows include `label` beside `key` when that string is present. A missing or blank label is left off the row. `other` has no `label`. Metrics without `labels:` return the same hashes as before. The callable is omitted from catalog metadata and `#version`.
+- `labels:` is accepted on a breakdown, and on a count, sum, average, or created-during-period time series that declares `group_by:`. Other metrics raise `ArgumentError`.
 
 ### Upgrade notes
 - No host change is required. Pass `labels:` when a kept group key needs a display name, and read `label` on that row. The callable returns the strings. Metrics does not query other tables. Consumers that only read `key` keep working.
