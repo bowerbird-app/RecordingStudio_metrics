@@ -55,10 +55,10 @@ module DummyMetricsCatalog
 
     breakdown :by_country, field: :country, title: "Members by country"
 
-    breakdown :by_country_named,
+    breakdown :by_country_labelled,
               field: :country,
-              title: "Members by country name",
-              labels: ->(values, _column) { { "AU" => "Australia", "US" => "United States" }.slice(*values.map(&:to_s)) }
+              title: "Where members live",
+              labels: ->(_values, _column) { { "AU" => "Australia", "US" => "United States" } }
   end
 
   RecordingStudioMetrics.register(

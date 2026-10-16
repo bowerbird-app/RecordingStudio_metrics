@@ -131,19 +131,6 @@ module RecordingStudioMetrics
       cumulative == true || semantics.to_s == "population_at_end_of_period"
     end
 
-    def labels_for(values, column)
-      return {} unless labels.respond_to?(:call)
-
-      mapped = labels.call(Array(values), column)
-      raise Errors::CalculationError, "#{identifier} labels must return a Hash" unless mapped.is_a?(Hash)
-
-      mapped
-    rescue Errors::Error
-      raise
-    rescue StandardError => e
-      raise Errors::CalculationError, e.message
-    end
-
     private
 
     def inferred_result_type
@@ -199,6 +186,7 @@ module RecordingStudioMetrics
       raise ArgumentError, "#{metric_type} metrics require a field" if field_required? && field.nil?
       raise ArgumentError, "#{identifier} does not support group_by" if group_by.any? && !groupable?
       raise ArgumentError, "labels must be callable" unless labels.nil? || labels.respond_to?(:call)
+      raise ArgumentError, "#{identifier} does not support labels" if labels && !labelable?
 
       return unless numeric_measurement? && value_field.nil?
 
@@ -207,6 +195,10 @@ module RecordingStudioMetrics
 
     def groupable?
       %i[count sum average].include?(metric_type) || (metric_type == :timeseries && !population_at_end?)
+    end
+
+    def labelable?
+      metric_type == :breakdown || (groupable? && group_by.any?)
     end
 
     def field_required?

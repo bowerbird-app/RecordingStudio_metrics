@@ -98,31 +98,37 @@ module RecordingStudioMetrics
       end
 
       def grouping(groups, other)
-        { group_by: group_field, groups: groups, other: other }
+        { group_by: group_field, groups: labeled_rows(groups, group_field), other: other }
       end
 
       def labeled_rows(rows, column)
-        return rows if rows.blank? || !definition.labels.respond_to?(:call)
+        return rows if definition.labels.nil? || rows.blank?
 
-        mapped = definition.labels_for(rows.map { |row| row[:key] }, column)
-        rows.map { |row| labeled_row(row, mapped) }
+        names = definition.labels.call(rows.map { |row| row[:key] }, column)
+        raise Errors::CalculationError, "labels must return a Hash" unless names.is_a?(Hash)
+
+        rows.map { |row| with_label(row, names) }
+      rescue Errors::Error, ActiveRecord::ActiveRecordError
+        raise
+      rescue StandardError => e
+        raise Errors::CalculationError, e.message
       end
 
-      def labeled_row(row, mapped)
-        text = label_text(mapped, row[:key])
-        return row if text.nil?
+      def with_label(row, names)
+        label = label_for(names, row[:key])
+        return row if label.nil?
 
-        row.merge(label: text)
+        { key: row[:key], label: label }.merge(row.except(:key))
       end
 
-      def label_text(mapped, key)
-        value = mapped[key]
-        value = mapped[key.to_s] if value.nil?
-        value = mapped[key.to_sym] if value.nil? && (key.is_a?(String) || key.is_a?(Symbol))
-        return if value.nil?
+      def label_for(names, key)
+        [key, key.to_s].uniq.each do |candidate|
+          next unless names.key?(candidate)
 
-        text = value.to_s
-        text unless text.empty?
+          found = names[candidate]
+          return found.to_s unless found.blank?
+        end
+        nil
       end
 
       def result(value: nil, data: nil, extra: {}, grouping: {})
