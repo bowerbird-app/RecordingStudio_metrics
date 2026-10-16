@@ -39,7 +39,10 @@ module RecordingStudioMetrics
         values = index_cells(measure(cells), window)
         counts = definition.measurement == :average ? index_cells(cells.distinct.count, window) : values
 
-        groups = kept.map { |key| { key: key, data: series(window, values.transform_values { |row| row[key] }) } }
+        groups = labeled_rows(
+          kept.map { |key| { key: key, data: series(window, values.transform_values { |row| row[key] }) } },
+          group_field
+        )
         other = merged_series(window, values, counts, small) if small.any?
         grouping(groups, other)
       end

@@ -18,7 +18,7 @@ module RecordingStudioMetrics
         counts = grouped.distinct.count
         values = aggregate(grouped)
         kept, small = split_groups(counts)
-        groups = kept.map { |key| { key: key, value: coerce(values[key]) } }
+        groups = labeled_rows(kept.map { |key| { key: key, value: coerce(values[key]) } }, group_field)
         grouping(groups, merged_value(values, counts, small))
       end
 

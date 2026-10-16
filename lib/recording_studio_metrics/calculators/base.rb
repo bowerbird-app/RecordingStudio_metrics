@@ -101,6 +101,30 @@ module RecordingStudioMetrics
         { group_by: group_field, groups: groups, other: other }
       end
 
+      def labeled_rows(rows, column)
+        return rows if rows.blank? || !definition.labels.respond_to?(:call)
+
+        mapped = definition.labels_for(rows.map { |row| row[:key] }, column)
+        rows.map { |row| labeled_row(row, mapped) }
+      end
+
+      def labeled_row(row, mapped)
+        text = label_text(mapped, row[:key])
+        return row if text.nil?
+
+        row.merge(label: text)
+      end
+
+      def label_text(mapped, key)
+        value = mapped[key]
+        value = mapped[key.to_s] if value.nil?
+        value = mapped[key.to_sym] if value.nil? && (key.is_a?(String) || key.is_a?(Symbol))
+        return if value.nil?
+
+        text = value.to_s
+        text unless text.empty?
+      end
+
       def result(value: nil, data: nil, extra: {}, grouping: {})
         Result.new(
           metric: definition.identifier,

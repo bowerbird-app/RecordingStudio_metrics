@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Grouped results keep the ungrouped `value`/`data` total and add `group_by`, `groups` (`[{ key:, value: }]` or `[{ key:, data: }]`), and `other`.
 - Minimum group size: groups with fewer rows than `config.min_group_size` (default 5, per-metric `min_group_size:`) are merged into an unlabeled `other` bucket (`{ groups:, value: }` or `{ groups:, data: }`), so kept groups plus `other` add up to the total. The effective threshold appears in the catalog as `min_group_size`.
 
+## [0.4.0] - 2026-10-16
+
+### Added
+- Optional registration option `labels:` (a callable). Metrics calls it once per execute with the kept group values and the grouped column. It returns a Hash of raw group value to display string. Kept breakdown `data` rows and `group_by` `groups` rows include `label` next to `key` when a non-blank string is returned. Rows without a label, unlabelled metrics, and the `other` bucket are unchanged. The callable is not part of catalog metadata or cache version.
+
+### Upgrade notes
+- No host change is required. Owning gems that group by ids or other opaque keys can pass `labels:` and read the additive `label` field. Consumers that only use `key` keep working. Do not expect Metrics to resolve foreign records.
+
 ## [0.3.0] - 2026-10-13
 
 ### Added
@@ -58,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.1...v0.2.2
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.1.0...v0.2.0

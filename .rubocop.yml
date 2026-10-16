@@ -32,6 +32,7 @@ Layout/LineLength:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
+    - 'lib/recording_studio_metrics/calculators/base.rb'
     - 'lib/recording_studio_metrics/calculators/timeseries.rb'
     - 'lib/recording_studio_metrics/context.rb'
     - 'lib/recording_studio_metrics/definition.rb'

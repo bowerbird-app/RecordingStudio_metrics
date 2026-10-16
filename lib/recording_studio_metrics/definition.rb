@@ -38,7 +38,8 @@ module RecordingStudioMetrics
                 :cumulative,
                 :group_by,
                 :freshness,
-                :min_group_size
+                :min_group_size,
+                :labels
 
     def initialize(**attrs)
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
@@ -130,6 +131,19 @@ module RecordingStudioMetrics
       cumulative == true || semantics.to_s == "population_at_end_of_period"
     end
 
+    def labels_for(values, column)
+      return {} unless labels.respond_to?(:call)
+
+      mapped = labels.call(Array(values), column)
+      raise Errors::CalculationError, "#{identifier} labels must return a Hash" unless mapped.is_a?(Hash)
+
+      mapped
+    rescue Errors::Error
+      raise
+    rescue StandardError => e
+      raise Errors::CalculationError, e.message
+    end
+
     private
 
     def inferred_result_type
@@ -184,6 +198,7 @@ module RecordingStudioMetrics
 
       raise ArgumentError, "#{metric_type} metrics require a field" if field_required? && field.nil?
       raise ArgumentError, "#{identifier} does not support group_by" if group_by.any? && !groupable?
+      raise ArgumentError, "labels must be callable" unless labels.nil? || labels.respond_to?(:call)
 
       return unless numeric_measurement? && value_field.nil?
 

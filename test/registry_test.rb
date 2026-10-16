@@ -170,6 +170,31 @@ class RegistryTest < Minitest::Test
     assert_nil RecordingStudioMetrics.registry.api_authorize_for(:missing)
   end
 
+  def test_labels_must_be_callable
+    error = assert_raises(ArgumentError) do
+      RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+        breakdown :by_country, field: :country, labels: :upcase
+      end
+    end
+    assert_match(/labels must be callable/, error.message)
+  end
+
+  def test_labels_callable_is_kept_off_catalog_and_version_json
+    resolver = ->(values, _column) { values.to_h { |value| [value, value.to_s] } }
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      breakdown :by_country, field: :country, labels: resolver
+    end
+
+    definition = RecordingStudioMetrics.find("users.by_country")
+    assert_same resolver, definition.labels
+    refute definition.metadata.key?(:labels)
+    catalog = RecordingStudioMetrics.discover(context: catalog_context).find do |row|
+      row[:identifier] == "users.by_country"
+    end
+    refute catalog.key?(:labels)
+    assert definition.version
+  end
+
   def test_api_authorize_must_be_callable
     error = assert_raises(ArgumentError) do
       RecordingStudioMetrics.register(:users, model: ExampleRecord, api_authorize: :staff) do
