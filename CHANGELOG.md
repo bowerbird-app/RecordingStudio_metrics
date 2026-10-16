@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - 2026-10-16
+## [Unreleased]
 
 ### Added
 - Discovery catalog entries include `group_by`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (configured default), and `freshness`, alongside existing `unit` and `supported_intervals`.
@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `group_by` execute option (Ruby `execute(group_by:)`, API `group_by` query param, documented in OpenAPI). Values must be in the metric's catalog `group_by` list; others raise `RecordingStudioMetrics::Errors::InvalidGroupBy` (422 on the API). Supported on count, sum, average, and created-during-period time series, together with `from`/`to`/`interval` and filters. Registering `group_by:` on breakdown, custom, or population-at-end time series raises `ArgumentError`.
 - Grouped results keep the ungrouped `value`/`data` total and add `group_by`, `groups` (`[{ key:, value: }]` or `[{ key:, data: }]`), and `other`.
 - Minimum group size: groups with fewer rows than `config.min_group_size` (default 5, per-metric `min_group_size:`) are merged into an unlabeled `other` bucket (`{ groups:, value: }` or `{ groups:, data: }`), so kept groups plus `other` add up to the total. The effective threshold appears in the catalog as `min_group_size`.
+
+## [0.4.0] - 2026-10-16
+
+### Added
 - Optional `labels:` callable on a metric. Execute calls it once with the kept group values and the grouped column. The callable returns a Hash of raw value to string. Breakdown `data` rows and `group_by` `groups` rows include `label` beside `key` when that string is present. A missing or blank label is left off the row. `other` has no `label`. Metrics without `labels:` return the same hashes as before. The callable is omitted from catalog metadata and `#version`.
 
 ### Upgrade notes
@@ -62,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...HEAD
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.1...v0.2.2
