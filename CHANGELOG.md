@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-19
+
+### Changed
+- `RecordingStudioMetrics::Admin.chart_series` emits `{ x:, y: }` hashes for each point. ApexCharts 3.45.1 (via Flatpack) does not set the x-axis type to datetime, so `[date, value]` pairs land at `x=0` and the chart renders empty.
+
+### Upgrade notes
+- Callers in other gems that index pair points (`point[0]`, `point[1]`) must read `x` and `y` instead. This is a minor bump because that pair contract changed.
+
 ### Added
 - Discovery catalog entries include `group_by`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (configured default), and `freshness`, alongside existing `unit` and `supported_intervals`.
 - Optional registration options `group_by:` and `freshness:`. Defaults: `group_by` is `[]`; freshness derives from caching (`{ cached: true, max_age_seconds: }` or `{ cached: false }`). Existing registrations need no changes.
@@ -67,7 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.1...v0.2.2

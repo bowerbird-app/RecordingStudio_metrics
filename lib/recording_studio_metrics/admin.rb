@@ -21,7 +21,7 @@ module RecordingStudioMetrics
     def chart_series(identifier, admin_context:, name: nil, **params)
       result = execute(identifier, admin_context: admin_context, **params)
       series_name = name || result.title
-      points = Array(result.data).map { |row| [row[:date] || row["date"], row[:value] || row["value"]] }
+      points = Array(result.data).map { |row| { x: row[:date] || row["date"], y: row[:value] || row["value"] } }
       [{ name: series_name, data: points }]
     end
 
