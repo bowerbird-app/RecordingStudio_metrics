@@ -17,7 +17,16 @@ class AdminAdapterTest < Minitest::Test
         admin_context: admin_context,
         workspace_id: "ws-1"
       )
-      assert_equal [{ name: "Registrations", data: [["2026-07-01", 3], ["2026-08-01", 5]] }], series
+      points = series.dig(0, :data)
+      points.each do |point|
+        assert_instance_of Hash, point
+        assert_includes point.keys, :x
+        assert_includes point.keys, :y
+      end
+      assert_equal(
+        [{ name: "Registrations", data: [{ x: "2026-07-01", y: 3 }, { x: "2026-08-01", y: 5 }] }],
+        series
+      )
     end
   end
 
