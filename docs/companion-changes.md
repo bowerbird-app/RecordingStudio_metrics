@@ -15,7 +15,7 @@ Needed from the API gem:
 
 ## RecordingStudio_admin (v2.2.0)
 
-Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: }` series, builds a standalone `RecordingStudioAdmin::Widget` when Admin is loaded, maps chosen metric filters onto `Screen.filter` via `Admin.attach_filters(screen, identifier, only:)`, passes the screen's chosen filter values into `execute`, and supplies `summary_value` / `chart_series_proc` callables for existing Screen `summary` / `chart` DSLs. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs. The dummy pin is GitHub tag `v2.2.0` (admin i18n release: view strings via Rails I18n with an English locale file in the gem; rendered English unchanged; no host migrations or locale initializer).
+Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: [{ x:, y: }] }` series, builds a standalone `RecordingStudioAdmin::Widget` when Admin is loaded, maps chosen metric filters onto `Screen.filter` via `Admin.attach_filters(screen, identifier, only:)`, passes the screen's chosen filter values into `execute`, and supplies `summary_value` / `chart_series_proc` callables for existing Screen `summary` / `chart` DSLs. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs. The dummy pin is GitHub tag `v2.2.0` (admin i18n release: view strings via Rails I18n with an English locale file in the gem; rendered English unchanged; no host migrations or locale initializer).
 
 Needed from the Admin gem:
 
