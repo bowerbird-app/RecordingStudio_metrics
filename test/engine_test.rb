@@ -56,7 +56,7 @@ class EngineTest < Minitest::Test
     app_config = Struct.new(:x).new(nil)
     app = Struct.new(:config) do
       def config_for(_name)
-        raise RuntimeError, "Could not load configuration. No such file - config/recording_studio_metrics.yml"
+        raise "Could not load configuration. No such file - config/recording_studio_metrics.yml"
       end
     end.new(app_config)
 
@@ -69,7 +69,7 @@ class EngineTest < Minitest::Test
     app_config = Struct.new(:x).new(nil)
     app = Struct.new(:config) do
       def config_for(_name)
-        raise RuntimeError, "Malformed configuration for recording_studio_metrics.yml"
+        raise "Malformed configuration for recording_studio_metrics.yml"
       end
     end.new(app_config)
 

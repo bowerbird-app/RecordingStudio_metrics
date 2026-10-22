@@ -14,8 +14,8 @@ module RecordingStudioMetrics
           app.config_for(:recording_studio_metrics)
         rescue Errno::ENOENT
           nil
-        rescue RuntimeError => error
-          raise unless error.message.include?("No such file")
+        rescue RuntimeError => e
+          raise unless e.message.include?("No such file")
 
           nil
         end

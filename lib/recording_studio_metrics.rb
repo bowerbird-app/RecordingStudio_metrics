@@ -29,12 +29,10 @@ require "recording_studio_metrics/admin"
 
 module RecordingStudioMetrics
   class << self
+    attr_writer :configuration
+
     def configuration
       @configuration ||= Configuration.new
-    end
-
-    def configuration=(value)
-      @configuration = value
     end
 
     def configure
