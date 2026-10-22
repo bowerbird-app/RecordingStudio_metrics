@@ -64,6 +64,8 @@ RecordingStudioMetrics.register(:projects, model: Project, scope_attribute: :wor
 end
 ```
 
+`scope_value:` chooses which already-authorized context value is compared to `scope_attribute`. The default `:workspace_id` uses `Context#resolved_workspace_id` (`workspace_id`, else the root or access recording's recordable id). Pass `:root_recording_id` when the table is keyed by the root recording's id (`root_recording.id`), as RecordingStudio_logs summaries are. That opt-in still reads from the trusted context; it does not take ids from filters or callers. Other values raise `ArgumentError` at registration. If the opt-in is set and the context has no root recording, Metrics does not fall back to `workspace_id`; execution fails closed unless an `authorized_relation` is already on the context.
+
 Custom calculators receive the already-authorized relation. Use that relation. Do not start from `Model.all`.
 
 ## Standard types

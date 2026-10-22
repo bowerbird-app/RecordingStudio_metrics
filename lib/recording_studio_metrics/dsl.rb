@@ -2,7 +2,7 @@
 
 module RecordingStudioMetrics
   class DSL
-    attr_reader :metrics, :model, :scope_attribute, :api_authorize
+    attr_reader :metrics, :model, :scope_attribute, :scope_value, :api_authorize
 
     def initialize(
       resource,
@@ -10,6 +10,7 @@ module RecordingStudioMetrics
       blast_radius: :root,
       scope: nil,
       scope_attribute: nil,
+      scope_value: :workspace_id,
       api_authorize: nil
     )
       @resource = resource.to_sym
@@ -17,6 +18,7 @@ module RecordingStudioMetrics
       @blast_radius = blast_radius
       @scope = scope
       @scope_attribute = scope_attribute
+      @scope_value = scope_value
       @api_authorize = api_authorize
       @metrics = []
       validate_api_authorize!
@@ -92,6 +94,7 @@ module RecordingStudioMetrics
         blast_radius: options.delete(:blast_radius) || @blast_radius,
         scope: options.delete(:scope) || @scope,
         scope_attribute: options.delete(:scope_attribute) || @scope_attribute,
+        scope_value: options.delete(:scope_value) || @scope_value,
         filters: filters,
         source_location: caller_locations(2, 1)&.first,
         **options

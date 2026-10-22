@@ -84,4 +84,28 @@ class ContextTest < Minitest::Test
     assert_equal :root, context.scope
     refute context.site_authorized?
   end
+
+  def test_resolved_scope_id_uses_root_recording_id_when_opted_in
+    recording = Struct.new(:id, :recordable_id).new("rec-1", "ws-1")
+    context = RecordingStudioMetrics::Context.new(
+      actor: :admin,
+      scope: :root,
+      root_recording: recording
+    )
+
+    assert_equal "rec-1", context.resolved_scope_id(:root_recording_id)
+    assert_equal "ws-1", context.resolved_scope_id(:workspace_id)
+    assert_equal "ws-1", context.resolved_workspace_id
+  end
+
+  def test_resolved_scope_id_returns_nil_for_root_recording_id_without_root_recording
+    context = RecordingStudioMetrics::Context.new(
+      actor: :admin,
+      scope: :root,
+      workspace_id: "ws-1"
+    )
+
+    assert_nil context.resolved_scope_id(:root_recording_id)
+    assert_equal "ws-1", context.resolved_scope_id(:workspace_id)
+  end
 end

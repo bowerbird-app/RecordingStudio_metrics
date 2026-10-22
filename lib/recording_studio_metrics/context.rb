@@ -62,6 +62,15 @@ module RecordingStudioMetrics
         recordable_id(access_recording)
     end
 
+    def resolved_scope_id(kind = :workspace_id)
+      case kind.to_sym
+      when :root_recording_id
+        recording_id_for(root_recording).presence
+      else
+        resolved_workspace_id
+      end
+    end
+
     def validate!
       raise Errors::MissingContext, "scope is required" unless SCOPES.include?(scope)
       raise Errors::MissingContext, "actor or system identity is required" if actor.nil? && !system?

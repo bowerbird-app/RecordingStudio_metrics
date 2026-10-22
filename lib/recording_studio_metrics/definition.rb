@@ -9,6 +9,7 @@ module RecordingStudioMetrics
     MEASUREMENTS = %i[count sum average custom].freeze
     BLAST_RADII = %i[recording root site].freeze
     INTERVALS = %i[hour day week month year].freeze
+    SCOPE_VALUES = %i[workspace_id root_recording_id].freeze
 
     attr_reader :resource,
                 :name,
@@ -25,6 +26,7 @@ module RecordingStudioMetrics
                 :filters,
                 :scope,
                 :scope_attribute,
+                :scope_value,
                 :calculator,
                 :blast_radius,
                 :cache_for,
@@ -47,7 +49,7 @@ module RecordingStudioMetrics
     DEFINITION_KEYS = %i[
       resource name model metric_type result_type field unit title description
       intervals default_interval preferred_chart filters scope scope_attribute
-      calculator blast_radius cache_for cacheable exposed_apis source_location
+      scope_value calculator blast_radius cache_for cacheable exposed_apis source_location
       measurement grouping semantics value_field cumulative group_by freshness
       min_group_size labels bucket_timezone fill_gaps removal_column
     ].freeze
@@ -72,6 +74,7 @@ module RecordingStudioMetrics
       @group_by = (group_by.nil? ? default_group_by : Array(group_by)).map(&:to_sym)
       @fill_gaps = fill_gaps.nil? ? %i[count sum].include?(@measurement) : fill_gaps
       @removal_column = (removal_column.presence || :deleted_at).to_sym
+      @scope_value = scope_value.nil? ? :workspace_id : scope_value.to_sym
       validate!
     end
 
@@ -198,6 +201,7 @@ module RecordingStudioMetrics
       raise ArgumentError, "model is required for #{identifier}" unless model
       raise ArgumentError, "Unsupported result type #{result_type}" unless RESULT_TYPES.include?(result_type)
       raise ArgumentError, "Unsupported blast_radius #{blast_radius}" unless BLAST_RADII.include?(blast_radius)
+      raise ArgumentError, "Unsupported scope_value #{scope_value}" unless SCOPE_VALUES.include?(scope_value)
 
       unknown_intervals = intervals - INTERVALS
       raise ArgumentError, "Unsupported intervals #{unknown_intervals}" if unknown_intervals.any?
