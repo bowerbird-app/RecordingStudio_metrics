@@ -64,8 +64,6 @@ module RecordingStudioMetrics
 
     module_function
 
-    HTTP_VERB = :get
-
     def register!(api: :public, prefix: "metrics")
       unless defined?(RecordingStudioApi) && RecordingStudioApi.respond_to?(:register_endpoint)
         raise LoadError, "RecordingStudioApi is not available"
@@ -74,7 +72,7 @@ module RecordingStudioMetrics
       RecordingStudioApi.register_endpoint(
         metrics_endpoint_name(api, :index),
         api: api,
-        http_verb: HTTP_VERB,
+        http_verb: :get,
         path: prefix,
         handler: DiscoveryHandler,
         openapi: {
@@ -88,7 +86,7 @@ module RecordingStudioMetrics
       RecordingStudioApi.register_endpoint(
         metrics_endpoint_name(api, :show),
         api: api,
-        http_verb: HTTP_VERB,
+        http_verb: :get,
         path: "#{prefix}/:resource/:name",
         handler: ExecuteHandler,
         openapi: {

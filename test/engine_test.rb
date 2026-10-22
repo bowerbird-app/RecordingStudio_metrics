@@ -53,30 +53,38 @@ class EngineTest < Minitest::Test
   end
 
   def test_load_config_ignores_a_missing_yaml_file
-    app_config = Struct.new(:x).new(nil)
-    app = Struct.new(:config) do
-      def config_for(_name)
-        raise "Could not load configuration. No such file - config/recording_studio_metrics.yml"
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, "config"))
+      config_for_called = false
+      app_config = Struct.new(:x).new(nil)
+      app = Struct.new(:config, :root).new(app_config, dir)
+      app.define_singleton_method(:config_for) do |_name|
+        config_for_called = true
       end
-    end.new(app_config)
 
-    find_initializer("recording_studio_metrics.load_config").block.call(app)
+      find_initializer("recording_studio_metrics.load_config").block.call(app)
 
-    assert_equal "UTC", RecordingStudioMetrics.configuration.default_timezone
+      refute config_for_called
+      assert_equal "UTC", RecordingStudioMetrics.configuration.default_timezone
+    end
   end
 
   def test_load_config_raises_on_invalid_yaml
-    app_config = Struct.new(:x).new(nil)
-    app = Struct.new(:config) do
-      def config_for(_name)
-        raise "Malformed configuration for recording_studio_metrics.yml"
-      end
-    end.new(app_config)
+    Dir.mktmpdir do |dir|
+      yaml_path = File.join(dir, "config", "recording_studio_metrics.yml")
+      FileUtils.mkdir_p(File.dirname(yaml_path))
+      File.write(yaml_path, "{")
+      app_config = Struct.new(:x).new(nil)
+      app = Struct.new(:config, :root) do
+        def config_for(_name)
+          YAML.load_file(File.join(root, "config", "recording_studio_metrics.yml"))
+        end
+      end.new(app_config, dir)
 
-    error = assert_raises(RuntimeError) do
-      find_initializer("recording_studio_metrics.load_config").block.call(app)
+      assert_raises(Psych::SyntaxError) do
+        find_initializer("recording_studio_metrics.load_config").block.call(app)
+      end
     end
-    assert_match(/Malformed configuration/, error.message)
   end
 
   def test_engine_does_not_monkey_patch_models_or_controllers

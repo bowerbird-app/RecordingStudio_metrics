@@ -10,15 +10,13 @@ module RecordingStudioMetrics
 
     initializer "recording_studio_metrics.load_config" do |app|
       if app.respond_to?(:config_for)
-        yaml = begin
-          app.config_for(:recording_studio_metrics)
-        rescue Errno::ENOENT
-          nil
-        rescue RuntimeError => e
-          raise unless e.message.include?("No such file")
-
-          nil
-        end
+        yaml_path = if app.respond_to?(:paths) && (config_paths = app.paths["config"])
+                      first = Array(config_paths.respond_to?(:existent) ? config_paths.existent : config_paths).first
+                      File.join(first, "recording_studio_metrics.yml") if first
+                    elsif app.respond_to?(:root) && app.root
+                      File.join(app.root, "config", "recording_studio_metrics.yml")
+                    end
+        yaml = app.config_for(:recording_studio_metrics) if yaml_path.nil? || File.exist?(yaml_path)
         RecordingStudioMetrics.configuration.merge!(yaml) if yaml.respond_to?(:each)
       end
 

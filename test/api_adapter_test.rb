@@ -42,8 +42,25 @@ class ApiAdapterTest < Minitest::Test
   end
 
   def test_endpoints_are_get_only
-    assert_equal :get, RecordingStudioMetrics::Api::HTTP_VERB
-    refute_equal :post, RecordingStudioMetrics::Api::HTTP_VERB
+    recorded = []
+    api_stand_in = Module.new do
+      define_singleton_method(:register_endpoint) do |*_args, **kwargs|
+        recorded << kwargs
+      end
+    end
+
+    Object.const_set(:RecordingStudioApi, api_stand_in)
+    begin
+      RecordingStudioMetrics::Api.register!(api: :public)
+      RecordingStudioMetrics::Api.register!(api: :admin)
+
+      refute_empty recorded
+      recorded.each do |kwargs|
+        assert_equal :get, kwargs[:http_verb]
+      end
+    ensure
+      Object.send(:remove_const, :RecordingStudioApi) if defined?(RecordingStudioApi)
+    end
   end
 
   def test_register_requires_recording_studio_api
