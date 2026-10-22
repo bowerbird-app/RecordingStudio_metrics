@@ -64,12 +64,10 @@ module RecordingStudioMetrics
     end
 
     def apply_root_or_recording_scope(relation, definition, context)
-      attribute = inferred_scope_attribute(definition, relation)
-      scope_id = context.resolved_scope_id(definition.scope_value || :workspace_id)
-
       return recording_relation(relation, context) if context.scope == :recording && recordable_model?(definition.model)
 
-      return relation.where(attribute => scope_id) if attribute && scope_id
+      scoped = attribute_scope(relation, definition, context)
+      return scoped if scoped
 
       if recordable_model?(definition.model) && context.root_recording
         return recordable_root_relation(relation, context)
@@ -78,6 +76,12 @@ module RecordingStudioMetrics
       return relation if context.authorized_relation
 
       raise Errors::AuthorizationError, "unable to isolate workspace scope for #{definition.identifier}"
+    end
+
+    def attribute_scope(relation, definition, context)
+      attribute = inferred_scope_attribute(definition, relation)
+      scope_id = context.resolved_scope_id(definition.scope_value)
+      relation.where(attribute => scope_id) if attribute && scope_id
     end
 
     def inferred_scope_attribute(definition, relation)
