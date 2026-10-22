@@ -35,6 +35,43 @@ class ContextTest < Minitest::Test
     refute_equal first.scope_key, second.scope_key
   end
 
+  def test_invalid_timezone_raises_invalid_date_range
+    error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do
+      RecordingStudioMetrics::Context.new(
+        actor: :admin,
+        scope: :root,
+        workspace_id: "ws-1",
+        timezone: "Not/A/Zone"
+      )
+    end
+    assert_equal "invalid timezone", error.message
+  end
+
+  def test_unknown_context_options_are_rejected
+    error = assert_raises(ArgumentError) do
+      RecordingStudioMetrics::Context.new(
+        actor: :admin,
+        scope: :root,
+        workspace_id: "ws-1",
+        timezon: "UTC"
+      )
+    end
+    assert_match(/unknown keyword/i, error.message)
+  end
+
+  def test_from_api_rejects_unknown_overrides
+    api_context = Struct.new(:access_grant, :access_recording, :root_recording).new(
+      Struct.new(:actor).new(:client),
+      nil,
+      nil
+    )
+
+    error = assert_raises(ArgumentError) do
+      RecordingStudioMetrics::Context.from_api(api_context, workspace_id: "ws-1", timezon: "UTC")
+    end
+    assert_match(/unknown context options/, error.message)
+  end
+
   def test_from_api_defaults_to_root_and_not_site
     api_context = Struct.new(:access_grant, :access_recording, :root_recording, :api_key).new(
       Struct.new(:actor).new(:client),

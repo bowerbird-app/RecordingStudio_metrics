@@ -4,13 +4,13 @@ require "test_helper"
 
 class EngineTest < Minitest::Test
   def setup
-    @original_configuration = RecordingStudioMetrics.instance_variable_get(:@configuration)
-    RecordingStudioMetrics.instance_variable_set(:@configuration, RecordingStudioMetrics::Configuration.new)
+    @original_configuration = RecordingStudioMetrics.configuration
+    RecordingStudioMetrics.reset_configuration!
   end
 
   def teardown
     RecordingStudioMetrics.configuration.hooks.clear!
-    RecordingStudioMetrics.instance_variable_set(:@configuration, @original_configuration)
+    RecordingStudioMetrics.configuration = @original_configuration
   end
 
   def test_before_and_after_initialize_initializers_run_hooks
@@ -50,6 +50,41 @@ class EngineTest < Minitest::Test
     assert_equal "Australia/Brisbane", RecordingStudioMetrics.configuration.default_timezone
     assert_equal 12, RecordingStudioMetrics.configuration.max_timeseries_buckets
     assert_equal false, RecordingStudioMetrics.configuration.cache_enabled
+  end
+
+  def test_load_config_ignores_a_missing_yaml_file
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, "config"))
+      config_for_called = false
+      app_config = Struct.new(:x).new(nil)
+      app = Struct.new(:config, :root).new(app_config, dir)
+      app.define_singleton_method(:config_for) do |_name|
+        config_for_called = true
+      end
+
+      find_initializer("recording_studio_metrics.load_config").block.call(app)
+
+      refute config_for_called
+      assert_equal "UTC", RecordingStudioMetrics.configuration.default_timezone
+    end
+  end
+
+  def test_load_config_raises_on_invalid_yaml
+    Dir.mktmpdir do |dir|
+      yaml_path = File.join(dir, "config", "recording_studio_metrics.yml")
+      FileUtils.mkdir_p(File.dirname(yaml_path))
+      File.write(yaml_path, "{")
+      app_config = Struct.new(:x).new(nil)
+      app = Struct.new(:config, :root) do
+        def config_for(_name)
+          YAML.load_file(File.join(root, "config", "recording_studio_metrics.yml"))
+        end
+      end.new(app_config, dir)
+
+      assert_raises(Psych::SyntaxError) do
+        find_initializer("recording_studio_metrics.load_config").block.call(app)
+      end
+    end
   end
 
   def test_engine_does_not_monkey_patch_models_or_controllers

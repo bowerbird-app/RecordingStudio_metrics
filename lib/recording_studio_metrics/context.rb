@@ -11,8 +11,7 @@ module RecordingStudioMetrics
                 :timezone,
                 :workspace_id,
                 :authorized_relation,
-                :timestamp,
-                :extras
+                :timestamp
 
     def initialize(
       scope:, actor: nil,
@@ -23,8 +22,7 @@ module RecordingStudioMetrics
       workspace_id: nil,
       authorized_relation: nil,
       site_authorized: false,
-      timestamp: nil,
-      **extras
+      timestamp: nil
     )
       @actor = actor
       @system = system
@@ -36,7 +34,6 @@ module RecordingStudioMetrics
       @authorized_relation = authorized_relation
       @site_authorized = site_authorized
       @timestamp = timestamp || Time.current
-      @extras = extras
       validate!
     end
 
@@ -70,7 +67,11 @@ module RecordingStudioMetrics
       raise Errors::MissingContext, "actor or system identity is required" if actor.nil? && !system?
       raise Errors::MissingContext, "timezone is required" if timezone.blank?
 
-      Time.find_zone!(timezone)
+      begin
+        Time.find_zone!(timezone)
+      rescue ArgumentError
+        raise Errors::InvalidDateRange, "invalid timezone"
+      end
 
       case scope
       when :site
@@ -93,15 +94,23 @@ module RecordingStudioMetrics
               else
                 api_context.try(:api_client)
               end
+      unknown = overrides.keys - %i[
+        actor system scope access_recording root_recording timezone
+        workspace_id authorized_relation site_authorized timestamp
+      ]
+      raise ArgumentError, "unknown context options: #{unknown.join(', ')}" if unknown.any?
+
       new(
-        actor: actor,
-        system: actor.nil?,
-        scope: overrides.delete(:scope) || :root,
-        access_recording: api_context.access_recording,
-        root_recording: api_context.root_recording,
-        timezone: overrides.delete(:timezone),
-        site_authorized: overrides.delete(:site_authorized) || false,
-        **overrides
+        actor: overrides.fetch(:actor, actor),
+        system: overrides.fetch(:system, actor.nil?),
+        scope: overrides.fetch(:scope, :root),
+        access_recording: overrides.fetch(:access_recording, api_context.access_recording),
+        root_recording: overrides.fetch(:root_recording, api_context.root_recording),
+        timezone: overrides[:timezone],
+        workspace_id: overrides[:workspace_id],
+        authorized_relation: overrides[:authorized_relation],
+        site_authorized: overrides.fetch(:site_authorized, false),
+        timestamp: overrides[:timestamp]
       )
     end
 

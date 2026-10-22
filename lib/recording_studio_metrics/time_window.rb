@@ -2,17 +2,9 @@
 
 module RecordingStudioMetrics
   class TimeWindow
-    STEPPERS = {
-      hour: :advance_hour,
-      day: :advance_day,
-      week: :advance_week,
-      month: :advance_month,
-      year: :advance_year
-    }.freeze
-
     def initialize(interval:, start_at:, end_at:, timezone:, max_buckets:, max_period:)
       @interval = interval.to_sym
-      @timezone = Time.find_zone!(timezone)
+      @timezone = parse_timezone!(timezone)
       @max_buckets = max_buckets
       @max_period = max_period
       @start_at = coerce(start_at)
@@ -66,13 +58,19 @@ module RecordingStudioMetrics
       raise Errors::InvalidDateRange, "reporting period exceeds the configured maximum"
     end
 
+    def parse_timezone!(timezone)
+      Time.find_zone!(timezone)
+    rescue ArgumentError
+      raise Errors::InvalidDateRange, "invalid timezone"
+    end
+
     def coerce(value)
       return if value.nil?
       return coerce_string(value) if value.is_a?(String)
       return timezone.at(value) if value.respond_to?(:to_time)
 
       timezone.parse(value.to_s)
-    rescue ArgumentError
+    rescue ArgumentError, TypeError
       raise Errors::InvalidDateRange, "invalid time value"
     end
 

@@ -17,26 +17,62 @@ class ApiAdapterTest < Minitest::Test
     assert_empty RecordingStudioMetrics.discover(context: nil, api: :admin)
   end
 
-  def test_handlers_are_thin_wrappers
-    source = File.read(File.expand_path("../lib/recording_studio_metrics/api.rb", __dir__))
+  def test_handlers_call_discover_and_execute
+    RecordingStudioMetrics.register(:members, model: ExampleRecord) do
+      count :total, expose: { api: [:admin] }
+    end
 
-    assert_includes source, "RecordingStudioMetrics.discover"
-    assert_includes source, "RecordingStudioMetrics.execute"
-    refute_includes source, "relation.count"
+    identifiers = RecordingStudioMetrics::Api::DiscoveryHandler.call(api_context)[:metrics].map { |row| row[:identifier] }
+    assert_equal ["members.total"], identifiers
+
+    captured = {}
+    stub_result = RecordingStudioMetrics::Result.new(metric: "members.total", type: :scalar, value: 9)
+    execute = lambda do |identifier, **kwargs|
+      captured = kwargs.merge(identifier: identifier)
+      stub_result
+    end
+
+    payload = nil
+    RecordingStudioMetrics.stub(:execute, execute) do
+      payload = RecordingStudioMetrics::Api::ExecuteHandler.call(api_context(resource: "members", name: "total"))
+    end
+
+    assert_equal "members.total", captured[:identifier]
+    assert_equal 9, payload[:value]
   end
 
   def test_endpoints_are_get_only
-    source = File.read(File.expand_path("../lib/recording_studio_metrics/api.rb", __dir__))
+    recorded = []
+    api_stand_in = Module.new do
+      define_singleton_method(:register_endpoint) do |*_args, **kwargs|
+        recorded << kwargs
+      end
+    end
 
-    assert_includes source, "http_verb: :get"
-    refute_includes source, "http_verb: :post"
+    Object.const_set(:RecordingStudioApi, api_stand_in)
+    begin
+      RecordingStudioMetrics::Api.register!(api: :public)
+      RecordingStudioMetrics::Api.register!(api: :admin)
+
+      refute_empty recorded
+      recorded.each do |kwargs|
+        assert_equal :get, kwargs[:http_verb]
+      end
+    ensure
+      Object.send(:remove_const, :RecordingStudioApi) if defined?(RecordingStudioApi)
+    end
+  end
+
+  def test_register_requires_recording_studio_api
+    error = assert_raises(LoadError) { RecordingStudioMetrics::Api.register!(api: :admin) }
+    assert_match(/RecordingStudioApi is not available/, error.message)
   end
 
   def test_openapi_documents_execute_query_params
-    source = File.read(File.expand_path("../lib/recording_studio_metrics/api.rb", __dir__))
+    names = RecordingStudioMetrics::Api::EXECUTE_OPENAPI_PARAMETERS.map { |parameter| parameter[:name] }
 
-    %w[filters interval start from end to timezone].each do |name|
-      assert_includes source, "name: \"#{name}\""
+    %w[filters interval start from end to timezone group_by].each do |name|
+      assert_includes names, name
     end
   end
 

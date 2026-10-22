@@ -2,7 +2,7 @@
 
 module RecordingStudioMetrics
   class DSL
-    attr_reader :metrics, :scope_attribute, :api_authorize
+    attr_reader :metrics, :model, :scope_attribute, :api_authorize
 
     def initialize(
       resource,
@@ -10,8 +10,7 @@ module RecordingStudioMetrics
       blast_radius: :root,
       scope: nil,
       scope_attribute: nil,
-      api_authorize: nil,
-      **resource_options
+      api_authorize: nil
     )
       @resource = resource.to_sym
       @model = model
@@ -19,7 +18,6 @@ module RecordingStudioMetrics
       @scope = scope
       @scope_attribute = scope_attribute
       @api_authorize = api_authorize
-      @resource_options = resource_options
       @metrics = []
       validate_api_authorize!
     end

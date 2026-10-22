@@ -2,7 +2,7 @@
 
 Shared metrics and analytics for Recording Studio recordables and ordinary Active Record models. Define a metric once, then execute it from Admin, API, jobs, host dashboards, and MCP tools.
 
-This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic.
+This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic. Upgrade notes live in `UPGRADING.md`.
 
 Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v4.7.0`, Accessible dummy GitHub tag `v0.18.0`, Root Switchable dummy GitHub tag `v0.9.0`, API dummy GitHub tag `v0.7.0`, Admin dummy GitHub tag `v2.3.0`, Trashable dummy GitHub tag `v0.11.0` (`require: false`), Cache dummy GitHub tag `v0.5.0`, FlatPack dummy GitHub tag `v0.1.209`.
 
@@ -72,7 +72,7 @@ Custom calculators receive the already-authorized relation. Use that relation. D
 
 Filters must be declared. Unknown names, unknown operators, and undeclared columns are rejected. Values are bound as query parameters.
 
-Time series use half-open windows (`start` inclusive, `end` exclusive), chronological buckets, and zero-fill for count/sum gaps. Timestamp columns use timezone-aware `date_trunc` on PostgreSQL. `date` columns truncate the calendar value with no timezone (`date_trunc(interval, column::timestamp)::date`). Their filter runs from the calendar day of `start_at` through the day that contains `end_at`, and stops on `end_at`'s own day when that instant is midnight, so coarser buckets do not pull in days outside the window. `start_at` and `end_at` accept a time or a string parsed in the request timezone; a string that does not parse raises `RecordingStudioMetrics::Errors::InvalidDateRange`. Missing periods for averages stay empty (`nil`), not a fake zero. Creation-in-period is not the same as population-at-end-of-period; set `semantics:` when you mean the latter.
+Time series use half-open windows (`start` inclusive, `end` exclusive) and chronological buckets. Count and sum zero-fill empty buckets unless the metric sets `fill_gaps: false`, which omits those buckets. Timestamp columns use timezone-aware `date_trunc` on PostgreSQL in the request timezone, or `bucket_timezone:` when the metric pins one (for example `"UTC"`). `date` columns truncate the calendar value with no timezone (`date_trunc(interval, column::timestamp)::date`). Their filter runs from the calendar day of `start_at` through the day that contains `end_at`, and stops on `end_at`'s own day when that instant is midnight, so coarser buckets do not pull in days outside the window. `start_at` and `end_at` accept a time or a string parsed in the request timezone; a string that does not parse, a non-time value, or an invalid timezone raises `RecordingStudioMetrics::Errors::InvalidDateRange`. Missing periods for averages stay empty (`nil`), not a fake zero. Creation-in-period is not the same as population-at-end-of-period; set `semantics:` when you mean the latter. Population-at-end counts treat `deleted_at` (or `removal_column:`, such as `trashed_at`) as the instant the row left the population.
 
 ## Scope and authorization
 
@@ -131,7 +131,7 @@ RecordingStudioMetrics::Api.register!(api: :admin)
 
 Handlers only call `discover` / `execute` and raise RS_API error classes for 404 / 403 / 422. See `docs/companion-changes.md` for remaining companion hooks.
 
-Execute query params: `filters`, `interval`, `start` (aliases: `from`, `start_at`), `end` (aliases: `to`, `end_at`), `timezone`. If `start` and `from` (or `end` and `to`) are both provided with different values, the request fails with `InvalidDateRange`.
+Execute query params: `filters`, `interval`, `group_by`, `start` (aliases: `from`, `start_at`), `end` (aliases: `to`, `end_at`), `timezone`. If `start` and `from` (or `end` and `to`) are both provided with different values, the request fails with `InvalidDateRange`.
 
 Site-wide models (no workspace column) stay denied over the API unless the owning gem passes its own access check at registration:
 

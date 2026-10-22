@@ -7,30 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-22
+
+### Added
+- Per-metric `bucket_timezone:` for time-series rollups. Default is the request/context timezone.
+- Per-metric `fill_gaps:` (`true` for count and sum). Set `false` to omit empty buckets instead of filling `0`.
+- Per-metric `removal_column:` for population-at-end counts. Default `deleted_at` (pass `trashed_at` for Trashable).
+- Definition keys are allowlisted. Unknown options raise `ArgumentError` at registration.
+
+### Changed
+- Invalid context timezones and non-time window values raise `RecordingStudioMetrics::Errors::InvalidDateRange`.
+- Missing YAML config is still ignored; invalid config raises.
+- Install generator no longer injects Tailwind `@source` paths.
+- Engine home controller, root route, and unused pages migration are gone.
+- Committed `coverage/` output is removed and gitignored.
+
+### Upgrade notes
+- See `UPGRADING.md`. Existing registrations keep current behaviour. New options are opt-in.
+
 ## [0.5.0] - 2026-10-19
 
 ### Changed
-- `RecordingStudioMetrics::Admin.chart_series` emits `{ x:, y: }` hashes for each point. ApexCharts 3.45.1 (via Flatpack) does not set the x-axis type to datetime, so `[date, value]` pairs land at `x=0` and the chart renders empty.
+- `Admin.chart_series` points are `{ x:, y: }` hashes. ApexCharts 3.45.1 (via Flatpack) treats `[date, value]` pairs as `x=0`, so the chart is empty.
 
 ### Upgrade notes
-- Callers in other gems that index pair points (`point[0]`, `point[1]`) must read `x` and `y` instead. This is a minor bump because that pair contract changed.
+- Callers that read pair points (`point[0]`, `point[1]`) should read `x` and `y`.
 
 ### Added
-- Discovery catalog entries include `group_by`, `date_range` (`supported`, `max_period_seconds`, `max_buckets`), `timezone` (configured default), and `freshness`, alongside existing `unit` and `supported_intervals`.
-- Optional registration options `group_by:` and `freshness:`. Defaults: `group_by` is `[]`; freshness derives from caching (`{ cached: true, max_age_seconds: }` or `{ cached: false }`). Existing registrations need no changes.
-- `RecordingStudioMetrics.discover(resource:)` and API catalog filter `filters[resource]`, using the same `filters` object as metric execution. Unknown catalog filters are rejected.
-- `group_by` execute option (Ruby `execute(group_by:)`, API `group_by` query param, documented in OpenAPI). Values must be in the metric's catalog `group_by` list; others raise `RecordingStudioMetrics::Errors::InvalidGroupBy` (422 on the API). Supported on count, sum, average, and created-during-period time series, together with `from`/`to`/`interval` and filters. Registering `group_by:` on breakdown, custom, or population-at-end time series raises `ArgumentError`.
-- Grouped results keep the ungrouped `value`/`data` total and add `group_by`, `groups` (`[{ key:, value: }]` or `[{ key:, data: }]`), and `other`.
-- Minimum group size: groups with fewer rows than `config.min_group_size` (default 5, per-metric `min_group_size:`) are merged into an unlabeled `other` bucket (`{ groups:, value: }` or `{ groups:, data: }`), so kept groups plus `other` add up to the total. The effective threshold appears in the catalog as `min_group_size`.
+- Catalog entries include `group_by`, `date_range`, `timezone`, and `freshness`.
+- Registration options `group_by:` (default `[]`) and `freshness:` (from cache settings).
+- `discover(resource:)` and API `filters[resource]`. Unknown catalog filters are rejected.
+- Execute `group_by` (Ruby and API). Values must be in the metric's catalog list or `InvalidGroupBy` (422). Allowed on count, sum, average, and created-during-period time series. Registering it on breakdown, custom, or population-at-end series raises `ArgumentError`.
+- Results keep the ungrouped total and add `groups` plus `other`.
+- Groups smaller than `min_group_size` (default 5) merge into unlabeled `other`.
 
 ## [0.4.0] - 2026-10-16
 
 ### Added
-- Optional `labels:` callable on a metric. Execute calls it once with the kept group values and the grouped column. The callable returns a Hash of raw value to string. Breakdown `data` rows and `group_by` `groups` rows include `label` beside `key` when that string is present. A missing or blank label is left off the row. `other` has no `label`. Metrics without `labels:` return the same hashes as before. The callable is omitted from catalog metadata and `#version`.
-- `labels:` is accepted on a breakdown, and on a count, sum, average, or created-during-period time series that declares `group_by:`. Other metrics raise `ArgumentError`.
+- Optional `labels:` callable. It receives kept group values and the grouped column, and returns a Hash of raw value to display string. Breakdown `data` and `group_by` `groups` rows include `label` when that string is present. Blank labels are omitted. `other` has no `label`. The callable is not in catalog metadata or `#version`.
+- `labels:` is allowed on breakdowns, and on count, sum, average, or created-during-period time series that declare `group_by:`. Other metrics raise `ArgumentError`.
 
 ### Upgrade notes
-- No host change is required. Pass `labels:` when a kept group key needs a display name, and read `label` on that row. The callable returns the strings. Metrics does not query other tables. Consumers that only read `key` keep working.
+- No host change is required. Pass `labels:` when a group key needs a display name. Callers that only read `key` keep working.
 
 ## [0.3.0] - 2026-10-13
 
@@ -75,7 +93,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.2.2...v0.3.0
