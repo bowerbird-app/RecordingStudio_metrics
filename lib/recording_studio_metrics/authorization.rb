@@ -65,11 +65,11 @@ module RecordingStudioMetrics
 
     def apply_root_or_recording_scope(relation, definition, context)
       attribute = inferred_scope_attribute(definition, relation)
-      workspace_id = context.resolved_workspace_id
+      scope_id = context.resolved_scope_id(definition.scope_value || :workspace_id)
 
       return recording_relation(relation, context) if context.scope == :recording && recordable_model?(definition.model)
 
-      return relation.where(attribute => workspace_id) if attribute && workspace_id
+      return relation.where(attribute => scope_id) if attribute && scope_id
 
       if recordable_model?(definition.model) && context.root_recording
         return recordable_root_relation(relation, context)

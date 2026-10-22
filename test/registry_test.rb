@@ -243,6 +243,36 @@ class RegistryTest < Minitest::Test
     end
   end
 
+  def test_scope_value_defaults_to_workspace_id
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      count :total
+    end
+
+    assert_equal :workspace_id, RecordingStudioMetrics.find("users.total").scope_value
+  end
+
+  def test_scope_value_root_recording_id_is_accepted
+    RecordingStudioMetrics.register(
+      :log_summaries,
+      model: ExampleRecord,
+      scope_attribute: :root_recording_id,
+      scope_value: :root_recording_id
+    ) do
+      count :total
+    end
+
+    assert_equal :root_recording_id, RecordingStudioMetrics.find("log_summaries.total").scope_value
+  end
+
+  def test_invalid_scope_value_is_rejected
+    error = assert_raises(ArgumentError) do
+      RecordingStudioMetrics.register(:users, model: ExampleRecord, scope_value: :recordable_id) do
+        count :total
+      end
+    end
+    assert_match(/Unsupported scope_value/, error.message)
+  end
+
   def test_unknown_definition_keys_are_rejected
     error = assert_raises(ArgumentError) do
       RecordingStudioMetrics.register(:users, model: ExampleRecord) do

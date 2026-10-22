@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-10-22
+
+### Added
+- Optional register option `scope_value:` (`:workspace_id` default, or `:root_recording_id`).
+  It chooses which already-authorized context value is compared to `scope_attribute`.
+  Use `:root_recording_id` when the table is keyed by the root recording's id
+  (for example RecordingStudio_logs summaries), not the workspace/recordable id.
+  Other values raise `ArgumentError` at registration.
+
+### Upgrade notes
+- Existing metrics keep today's workspace resolution. No action unless a metric
+  must filter by `root_recording.id`. See `UPGRADING.md`.
+
 ## [0.6.0] - 2026-10-22
 
 ### Added
@@ -93,7 +106,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.3.0...v0.4.0
