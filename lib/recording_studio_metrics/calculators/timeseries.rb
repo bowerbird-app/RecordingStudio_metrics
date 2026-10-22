@@ -22,11 +22,14 @@ module RecordingStudioMetrics
       private
 
       def series(window, values)
-        fill = fill_missing?(definition.measurement)
-        window.buckets.map do |bucket|
-          value = values[bucket_key(bucket, window)]
-          value = numeric_or_zero(value) if fill
-          { date: window.format(bucket), value: value }
+        window.buckets.filter_map do |bucket|
+          key = bucket_key(bucket, window)
+          value = values[key]
+          if fill_gaps?
+            { date: window.format(bucket), value: numeric_or_zero(value) }
+          elsif !value.nil?
+            { date: window.format(bucket), value: value }
+          end
         end
       end
 
@@ -73,7 +76,7 @@ module RecordingStudioMetrics
           interval: interval,
           start_at: params[:start_at] || default_start_at(interval),
           end_at: params[:end_at] || context.timestamp,
-          timezone: context.timezone,
+          timezone: definition.bucket_timezone.presence || context.timezone,
           max_buckets: RecordingStudioMetrics.configuration.max_timeseries_buckets,
           max_period: RecordingStudioMetrics.configuration.max_reporting_period
         )
@@ -128,14 +131,14 @@ module RecordingStudioMetrics
       def existed_at(rel, bucket_end)
         table = rel.arel_table
         scoped = rel.where(table[definition.field].lt(bucket_end))
-        return scoped unless deleted_column?(rel)
+        return scoped unless removal_column?(rel)
 
-        deleted = table[:deleted_at]
-        scoped.where(deleted.eq(nil).or(deleted.gteq(bucket_end)))
+        removed = table[definition.removal_column]
+        scoped.where(removed.eq(nil).or(removed.gteq(bucket_end)))
       end
 
-      def deleted_column?(rel)
-        rel.klass.column_names.include?("deleted_at")
+      def removal_column?(rel)
+        rel.klass.column_names.include?(definition.removal_column.to_s)
       end
 
       def grouped_values(rel, window)
@@ -194,8 +197,8 @@ module RecordingStudioMetrics
         window.format(bucket)
       end
 
-      def fill_missing?(measurement)
-        %i[count sum].include?(measurement)
+      def fill_gaps?
+        definition.fill_gaps
       end
 
       def default_start_at(interval)

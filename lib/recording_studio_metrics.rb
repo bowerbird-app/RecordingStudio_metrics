@@ -33,6 +33,10 @@ module RecordingStudioMetrics
       @configuration ||= Configuration.new
     end
 
+    def configuration=(value)
+      @configuration = value
+    end
+
     def configure
       yield(configuration) if block_given?
       configuration

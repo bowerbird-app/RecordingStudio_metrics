@@ -9,7 +9,7 @@ module RecordingStudioMetrics
 
       context.validate!
 
-      if definition.blast_radius == :site && !(context.scope == :site && context.site_authorized?)
+      if definition.blast_radius == :site && context.scope != :site
         raise Errors::AuthorizationError, "site-level authorization is required"
       end
 

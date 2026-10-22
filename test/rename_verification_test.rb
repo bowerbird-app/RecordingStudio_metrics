@@ -205,17 +205,10 @@ class RenameVerificationTest < Minitest::Test
                  "Application controller should be in module #{@pascal_name}")
   end
 
-  def test_home_controller_exists
+  def test_engine_does_not_ship_a_home_controller
     path = File.join(@root, "app", "controllers", @gem_name, "home_controller.rb")
-    assert File.exist?(path),
-           "Home controller should exist at #{path}"
-  end
-
-  def test_home_controller_has_correct_module
-    path = File.join(@root, "app", "controllers", @gem_name, "home_controller.rb")
-    content = File.read(path)
-    assert_match(/^module #{@pascal_name}$/, content,
-                 "Home controller should be in module #{@pascal_name}")
+    refute File.exist?(path),
+           "Template home controller should be removed"
   end
 
   # ============================================================

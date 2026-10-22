@@ -41,7 +41,7 @@ module RecordingStudioMetrics
         cache_enabled: cache_enabled,
         default_cache_ttl: default_cache_ttl,
         min_group_size: min_group_size,
-        hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
+        hooks_registered: hooks.registered_counts
       }
     end
 

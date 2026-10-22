@@ -243,6 +243,39 @@ class RegistryTest < Minitest::Test
     end
   end
 
+  def test_unknown_definition_keys_are_rejected
+    error = assert_raises(ArgumentError) do
+      RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+        count :total, buckett_timezone: "UTC"
+      end
+    end
+    assert_match(/unknown metric options/, error.message)
+    assert_match(/buckett_timezone/, error.message)
+  end
+
+  def test_timeseries_options_are_accepted_at_registration
+    RecordingStudioMetrics.register(:users, model: ExampleRecord) do
+      timeseries :registrations,
+                 field: :created_at,
+                 bucket_timezone: "UTC",
+                 fill_gaps: false,
+                 removal_column: :trashed_at
+      timeseries :headcount,
+                 field: :created_at,
+                 cumulative: true
+    end
+
+    registrations = RecordingStudioMetrics.find("users.registrations")
+    assert_equal "UTC", registrations.bucket_timezone
+    assert_equal false, registrations.fill_gaps
+    assert_equal :trashed_at, registrations.removal_column
+
+    headcount = RecordingStudioMetrics.find("users.headcount")
+    assert_nil headcount.bucket_timezone
+    assert_equal true, headcount.fill_gaps
+    assert_equal :deleted_at, headcount.removal_column
+  end
+
   def test_catalog_shows_min_group_size_for_groupable_metrics
     RecordingStudioMetrics.register(:users, model: ExampleRecord) do
       count :total, group_by: [:country]

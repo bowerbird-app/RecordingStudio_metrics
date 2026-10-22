@@ -84,6 +84,23 @@ class TimeWindowTest < Minitest::Test
     assert_equal %w[2026-01-02 2026-01-03], sydney_dates
   end
 
+  def test_non_time_values_raise_invalid_date_range
+    bogus = Object.new
+    def bogus.to_time
+      self
+    end
+
+    start_error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do
+      window(interval: :day, start_at: bogus, end_at: Time.utc(2026, 10, 4))
+    end
+    assert_equal "invalid time value", start_error.message
+
+    finish_error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do
+      window(interval: :day, start_at: Time.utc(2026, 10, 1), end_at: bogus)
+    end
+    assert_equal "invalid time value", finish_error.message
+  end
+
   def test_unparseable_strings_raise_invalid_date_range
     ["not-a-date", "2026-13-40", ""].each do |garbage|
       start_error = assert_raises(RecordingStudioMetrics::Errors::InvalidDateRange) do

@@ -39,9 +39,23 @@ module RecordingStudioMetrics
                 :group_by,
                 :freshness,
                 :min_group_size,
-                :labels
+                :labels,
+                :bucket_timezone,
+                :fill_gaps,
+                :removal_column
+
+    DEFINITION_KEYS = %i[
+      resource name model metric_type result_type field unit title description
+      intervals default_interval preferred_chart filters scope scope_attribute
+      calculator blast_radius cache_for cacheable exposed_apis source_location
+      measurement grouping semantics value_field cumulative group_by freshness
+      min_group_size labels bucket_timezone fill_gaps removal_column
+    ].freeze
 
     def initialize(**attrs)
+      unknown = attrs.keys - DEFINITION_KEYS
+      raise ArgumentError, "unknown metric options: #{unknown.join(', ')}" if unknown.any?
+
       attrs.each { |key, value| instance_variable_set("@#{key}", value) }
       @name = name.to_sym
       @resource = resource.to_sym
@@ -56,6 +70,8 @@ module RecordingStudioMetrics
       @grouping = grouping&.to_sym
       @unit ||= default_unit
       @group_by = (group_by.nil? ? default_group_by : Array(group_by)).map(&:to_sym)
+      @fill_gaps = fill_gaps.nil? ? %i[count sum].include?(@measurement) : fill_gaps
+      @removal_column = (removal_column.presence || :deleted_at).to_sym
       validate!
     end
 
@@ -108,7 +124,10 @@ module RecordingStudioMetrics
         cumulative: cumulative,
         group_by: group_by,
         freshness: freshness,
-        min_group_size: min_group_size
+        min_group_size: min_group_size,
+        bucket_timezone: bucket_timezone,
+        fill_gaps: fill_gaps,
+        removal_column: removal_column
       }.compact
     end
 

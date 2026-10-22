@@ -4,13 +4,13 @@ require "test_helper"
 
 class EngineTest < Minitest::Test
   def setup
-    @original_configuration = RecordingStudioMetrics.instance_variable_get(:@configuration)
-    RecordingStudioMetrics.instance_variable_set(:@configuration, RecordingStudioMetrics::Configuration.new)
+    @original_configuration = RecordingStudioMetrics.configuration
+    RecordingStudioMetrics.reset_configuration!
   end
 
   def teardown
     RecordingStudioMetrics.configuration.hooks.clear!
-    RecordingStudioMetrics.instance_variable_set(:@configuration, @original_configuration)
+    RecordingStudioMetrics.configuration = @original_configuration
   end
 
   def test_before_and_after_initialize_initializers_run_hooks
@@ -50,6 +50,33 @@ class EngineTest < Minitest::Test
     assert_equal "Australia/Brisbane", RecordingStudioMetrics.configuration.default_timezone
     assert_equal 12, RecordingStudioMetrics.configuration.max_timeseries_buckets
     assert_equal false, RecordingStudioMetrics.configuration.cache_enabled
+  end
+
+  def test_load_config_ignores_a_missing_yaml_file
+    app_config = Struct.new(:x).new(nil)
+    app = Struct.new(:config) do
+      def config_for(_name)
+        raise RuntimeError, "Could not load configuration. No such file - config/recording_studio_metrics.yml"
+      end
+    end.new(app_config)
+
+    find_initializer("recording_studio_metrics.load_config").block.call(app)
+
+    assert_equal "UTC", RecordingStudioMetrics.configuration.default_timezone
+  end
+
+  def test_load_config_raises_on_invalid_yaml
+    app_config = Struct.new(:x).new(nil)
+    app = Struct.new(:config) do
+      def config_for(_name)
+        raise RuntimeError, "Malformed configuration for recording_studio_metrics.yml"
+      end
+    end.new(app_config)
+
+    error = assert_raises(RuntimeError) do
+      find_initializer("recording_studio_metrics.load_config").block.call(app)
+    end
+    assert_match(/Malformed configuration/, error.message)
   end
 
   def test_engine_does_not_monkey_patch_models_or_controllers

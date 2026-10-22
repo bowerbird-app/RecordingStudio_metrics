@@ -65,7 +65,7 @@ module RecordingStudioMetrics
           @metrics[definition.identifier] = definition
         end
         @resources[key] = {
-          model: dsl.instance_variable_get(:@model),
+          model: dsl.model,
           scope: dsl.resource_scope,
           scope_attribute: dsl.scope_attribute,
           api_authorize: dsl.api_authorize

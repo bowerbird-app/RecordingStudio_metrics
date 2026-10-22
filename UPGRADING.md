@@ -1,0 +1,27 @@
+# Upgrading RecordingStudioMetrics
+
+## Upgrading to 0.6.0
+
+`0.6.0` adds per-metric rollup options and fails closed on bad dates, unknown
+definition keys, and invalid config. Update the host dependency to
+`recording_studio_metrics`, `~> 0.6.0`.
+
+1. No migrations in this gem.
+2. New registration options default to current behaviour:
+   - `bucket_timezone:` — IANA zone for time-series buckets. Omit it to keep
+     using the request/context timezone.
+   - `fill_gaps:` — `true` for count and sum (empty buckets stay `0`). Set
+     `false` to omit empty buckets. Average still does not zero-fill.
+   - `removal_column:` — column used for population-at-end counts. Default
+     `deleted_at`. Pass `trashed_at` for Trashable models.
+3. An invalid context timezone and a non-time `start_at`/`end_at` value now
+   raise `RecordingStudioMetrics::Errors::InvalidDateRange` instead of
+   `ArgumentError` or `TypeError`.
+4. Unknown keys on a metric definition raise `ArgumentError` at registration.
+5. `config/recording_studio_metrics.yml` is still optional. A missing file is
+   ignored; invalid YAML raises.
+6. The engine no longer ships a template pages migration, a Tailwind `@source`
+   installer, or a `head :ok` home route.
+
+If you are still on `0.5.0` or older, complete that release's notes in
+`CHANGELOG.md` first.
