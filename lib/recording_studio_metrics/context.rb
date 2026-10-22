@@ -65,7 +65,7 @@ module RecordingStudioMetrics
     def resolved_scope_id(kind = :workspace_id)
       case kind.to_sym
       when :root_recording_id
-        recording_id_for(root_recording).presence || workspace_id.presence
+        recording_id_for(root_recording).presence
       else
         resolved_workspace_id
       end

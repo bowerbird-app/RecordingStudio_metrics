@@ -13,8 +13,8 @@ Update the host dependency to `recording_studio_metrics`, `~> 0.6.1`.
    `scope_attribute` stores the root recording's id (`root_recording.id`),
    not the workspace/recordable id. The value still comes from the
    already-authorized context. If that context has no root recording, Metrics
-   uses an explicit `workspace_id` on the same context when present; otherwise
-   it raises the usual authorization or missing-context error.
+   does not fall back to `workspace_id`; it raises the usual authorization
+   error unless an `authorized_relation` is already on the context.
 4. Any other `scope_value` raises `ArgumentError` at registration.
 
 If you are still on `0.6.0` or older, complete that release's notes first.

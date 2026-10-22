@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   It chooses which already-authorized context value is compared to `scope_attribute`.
   Use `:root_recording_id` when the table is keyed by the root recording's id
   (for example RecordingStudio_logs summaries), not the workspace/recordable id.
-  Other values raise `ArgumentError` at registration.
+  That opt-in uses only the root recording's id; it does not fall back to
+  `workspace_id`. Other values raise `ArgumentError` at registration.
 
 ### Upgrade notes
 - Existing metrics keep today's workspace resolution. No action unless a metric

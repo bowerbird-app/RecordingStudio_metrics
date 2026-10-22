@@ -45,21 +45,20 @@ class ScopeValueTest < ActiveSupport::TestCase
     assert_equal 1, result.value
   end
 
-  test "opt-in without a root recording uses an explicit workspace id" do
+  test "opt-in with only workspace_id raises AuthorizationError" do
     register_summaries(scope_value: :root_recording_id)
-    LogSummary.create!(root_recording_id: @recordable_id)
 
-    result = RecordingStudioMetrics.execute(
-      "log_summaries.total",
-      context: RecordingStudioMetrics::Context.new(
-        actor: @actor,
-        scope: :root,
-        workspace_id: @recordable_id,
-        timezone: "UTC"
+    assert_raises(RecordingStudioMetrics::Errors::AuthorizationError) do
+      RecordingStudioMetrics.execute(
+        "log_summaries.total",
+        context: RecordingStudioMetrics::Context.new(
+          actor: @actor,
+          scope: :root,
+          workspace_id: @recordable_id,
+          timezone: "UTC"
+        )
       )
-    )
-
-    assert_equal 2, result.value
+    end
   end
 
   test "opt-in without a root recording or workspace id fails closed" do

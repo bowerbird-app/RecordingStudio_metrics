@@ -98,14 +98,14 @@ class ContextTest < Minitest::Test
     assert_equal "ws-1", context.resolved_workspace_id
   end
 
-  def test_resolved_scope_id_falls_back_to_workspace_id_without_root_recording
+  def test_resolved_scope_id_returns_nil_for_root_recording_id_without_root_recording
     context = RecordingStudioMetrics::Context.new(
       actor: :admin,
       scope: :root,
       workspace_id: "ws-1"
     )
 
-    assert_equal "ws-1", context.resolved_scope_id(:root_recording_id)
+    assert_nil context.resolved_scope_id(:root_recording_id)
     assert_equal "ws-1", context.resolved_scope_id(:workspace_id)
   end
 end
