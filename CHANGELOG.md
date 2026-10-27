@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - 2026-10-27
 
 ### Changed
-- Require `recording_studio` `>= 6.1.0`. The dummy pins Recording Studio tag `v6.1.0` and Flatpack `0.1.319`.
+- Require `recording_studio` `>= 6.1.0`. The dummy pins Recording Studio tag `v6.1.0`, Flatpack `0.1.319`, Admin `v2.7.0`, and Logs `v0.7.0`.
 - `RecordingStudioMetrics::Configuration#layout` defaults to `nil` and is validated by `RecordingStudio::Layout.accept`.
 - Engine and dummy controllers call `recording_studio_layout`. Dummy pages set `content_for :title` and `:subtitle`, use `flat_pack_page_nav` for back, and `register_page_nav` for the sign-out action.
 

@@ -14,7 +14,7 @@
 8. `FlatPack::Card::Component` no longer accepts `style:`. Pass `background:`, `border:`, and `shadow:`.
 9. Root Switchable `v0.9.0` still renders `FlatPack::PageNav` with `anchor_label:` and a card `style:`. The dummy overrides `recording_studio_root_switchable/root_switches/show` so that page uses `flat_pack_page_nav` and `background:`.
 
-The dummy still pins companion gems whose gemspecs require `recording_studio` `< 5`. `test/support/widen_recording_studio_requirement.rb` relaxes those requirements before Bundler resolves, so the dummy can boot Recording Studio `6.1.0`. A host that already depends on Recording Studio `6.1.0` does not need that file.
+The dummy still pins companion gems whose gemspecs require `recording_studio` `< 5`. Logs `v0.7.0` also requires `recording_studio_metrics` `~> 0.6.1`, which rejects `0.7.0`. `test/support/widen_recording_studio_requirement.rb` relaxes those requirements before Bundler resolves, so the dummy can boot Recording Studio `6.1.0` and this gem. A host that already depends on those versions does not need that file.
 
 If you are still on `0.6.1` or older, complete that release's notes first.
 
