@@ -7,7 +7,8 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_equal [ "all_workspaces" ], RecordingStudioRootSwitchable.configuration.scopes.keys
     assert_equal :application_layout, RecordingStudioRootSwitchable.configuration.layout
     assert_includes ApplicationController.ancestors, RecordingStudio::RootSwitchable::ControllerSupport
-    assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+    assert_includes ApplicationController.instance_methods, :recording_studio_resolved_layout
+    refute_includes File.read(Rails.root.join("app/controllers/application_controller.rb")), "UsesDefaultLayout"
   end
 
   test "dummy app validates recordable declarations" do
@@ -70,6 +71,6 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     refute RecordingStudio.capability_enabled?(:accessible, for: Folder)
     refute RecordingStudio.capability_enabled?(:accessible, for: Page)
-    assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+    assert_includes ApplicationController.instance_methods, :recording_studio_resolved_layout
   end
 end

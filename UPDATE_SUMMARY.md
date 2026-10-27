@@ -2,9 +2,9 @@
 
 Copied addons now start on the Support host-kit floor.
 
-- Gemspec: `add_dependency "recording_studio", "~> 4.2"`
-- Dummy GitHub tags: Recording Studio `v4.7.0`, Accessible `v0.18.0`, Root Switchable `v0.9.0`, API `v0.7.0`, Admin `v2.3.0`, Trashable `v0.11.0`, Cache `v0.5.0`, FlatPack `v0.1.209`
+- Gemspec: `add_dependency "recording_studio", ">= 6.1.0"`
+- Dummy GitHub tags: Recording Studio `v6.1.0`, Accessible `v0.18.0`, Root Switchable `v0.9.0`, API `v0.7.0`, Admin `v2.3.0`, Trashable `v0.11.0`, Cache `v0.5.0`, FlatPack ref `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`0.1.319`)
 - Root and dummy Rails locks both `8.1.4`
-- Authenticated dummy layout: `RecordingStudio::UsesDefaultLayout` plus FlatPack CSS/JS
+- Authenticated dummy layout: `recording_studio_layout` plus FlatPack CSS/JS
 - Hooks and BaseService come from core; do not copy them into a new addon
 - Recordable declarations remain required
