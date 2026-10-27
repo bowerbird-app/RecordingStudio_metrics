@@ -7,13 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.2] - 2026-10-27
+## [0.7.1] - 2026-10-27
 
 ### Changed
 - The `recording_studio` runtime dependency is now `>= 4.2`, `< 7`, so 4.x, 5.x, and 6.x (including 6.1.0) can resolve.
 
 ### Upgrade notes
 - Hosts and sibling gems on Recording Studio 6.x can lock this gem without a Bundler conflict. Dummy still uses 4.7.0 for tests.
+
+## [0.7.0] - 2026-10-27
+
+### Changed
+- Require `recording_studio` `>= 6.1.0`. The dummy pins Recording Studio tag `v6.1.0`, Flatpack `0.1.319`, Admin `v2.7.0`, and Logs `v0.7.0`.
+- `RecordingStudioMetrics::Configuration#layout` defaults to `nil` and is validated by `RecordingStudio::Layout.accept`.
+- Engine and dummy controllers call `recording_studio_layout`. Dummy pages set `content_for :title` and `:subtitle`, use `flat_pack_page_nav` for back, and `register_page_nav` for the sign-out action.
+
+### Upgrade notes
+- See `UPGRADING.md`. Existing metric, API, and Admin calls keep current behaviour.
 
 ## [0.6.1] - 2026-10-22
 
@@ -115,8 +125,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.2...HEAD
-[0.6.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.1...v0.6.2
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.4.0...v0.5.0

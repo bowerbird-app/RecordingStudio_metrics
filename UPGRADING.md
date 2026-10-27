@@ -1,5 +1,23 @@
 # Upgrading RecordingStudioMetrics
 
+## Upgrading to 0.7.0
+
+`0.7.0` requires Recording Studio `>= 6.1.0`. Flatpack must be `>= 0.1.315`. This repository pins Flatpack ref `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`0.1.319`). Update the host dependency to `recording_studio_metrics`, `~> 0.7.0`.
+
+1. No migrations in this gem.
+2. Metric registration, `execute`, API exposure, and Admin helpers keep their current contracts.
+3. `RecordingStudioMetrics.configuration.layout` defaults to `nil`. `nil` uses `RecordingStudio.configuration.layout`, then `recording_studio/default_layout`. Assign a layout name, `false`, or a callable that accepts `controller:`.
+4. Call `recording_studio_layout` on engine and host controllers. Do not include `RecordingStudio::UsesDefaultLayout` and do not hard-code `layout "recording_studio/default_layout"`.
+5. The default layout renders one `FlatPack::PageTitle` from `content_for :title` and `content_for :subtitle`. Remove a second page-level title from the view.
+6. Set the back and close buttons with `flat_pack_page_nav(round: true, style: :default, back_href:, back_tooltip:, anchor_href:, anchor_tooltip:)`. `recording_studio_page_nav` is gone.
+7. Register right-side actions with `register_page_nav`. `recording_studio_page_nav_right` remains for custom HTML that is not a button, such as the root switch dropdown.
+8. `FlatPack::Card::Component` no longer accepts `style:`. Pass `background:`, `border:`, and `shadow:`.
+9. Root Switchable `v0.9.0` still renders `FlatPack::PageNav` with `anchor_label:` and a card `style:`. The dummy overrides `recording_studio_root_switchable/root_switches/show` so that page uses `flat_pack_page_nav` and `background:`.
+
+The dummy still pins companion gems whose gemspecs require `recording_studio` `< 5`. Logs `v0.7.0` also requires `recording_studio_metrics` `~> 0.6.1`, which rejects `0.7.0`. `test/support/widen_recording_studio_requirement.rb` relaxes those requirements before Bundler resolves, so the dummy can boot Recording Studio `6.1.0` and this gem. A host that already depends on those versions does not need that file.
+
+If you are still on `0.6.1` or older, complete that release's notes first.
+
 ## Upgrading to 0.6.1
 
 `0.6.1` adds an optional `scope_value:` on `RecordingStudioMetrics.register`.

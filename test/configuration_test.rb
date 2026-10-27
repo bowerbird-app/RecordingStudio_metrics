@@ -34,7 +34,20 @@ class ConfigurationTest < Minitest::Test
   def test_defaults
     assert_equal "UTC", @configuration.default_timezone
     assert_equal true, @configuration.cache_enabled
+    assert_nil @configuration.layout
     assert_instance_of RecordingStudio::Hooks, @configuration.hooks
+  end
+
+  def test_layout_accepts_a_name_and_rejects_a_positional_callable
+    @configuration.layout = "application"
+
+    assert_equal "application", @configuration.layout
+
+    error = assert_raises(ArgumentError) do
+      @configuration.layout = ->(controller) { "application-#{controller.class}" }
+    end
+    assert_match(/controller:/, error.message)
+    assert_equal "application", @configuration.layout
   end
 
   def test_expose_to_api_is_opt_in
