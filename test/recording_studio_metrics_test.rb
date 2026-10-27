@@ -4,17 +4,21 @@ require "test_helper"
 
 class RecordingStudioMetricsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.6.1", ::RecordingStudioMetrics::VERSION
+    assert_equal "0.6.2", ::RecordingStudioMetrics::VERSION
   end
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudioMetrics::Engine
   end
 
-  def test_gemspec_pins_recording_studio_4_2
+  def test_gemspec_allows_recording_studio_6_x
     gemspec = File.read(File.expand_path("../recording_studio_metrics.gemspec", __dir__))
+    requirement = Gem::Requirement.new(">= 4.2", "< 7")
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 4.2", "< 7"'
+    assert requirement.satisfied_by?(Gem::Version.new("4.2.0"))
+    assert requirement.satisfied_by?(Gem::Version.new("6.1.0"))
+    refute requirement.satisfied_by?(Gem::Version.new("7.0.0"))
   end
 
   def test_gemspec_excludes_cursor_config
