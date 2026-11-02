@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.1] - 2026-11-02
 
 ### Changed
-- Dummy host pins Admin at tag `v2.5.1` and no longer depends on Logs or the Bundler specification shim.
+- Dummy host pins Logs at tag `v0.7.1` and no longer uses the Bundler specification shim.
 - Dummy root-switch `return_to` checks rescue `ActionController::RoutingError` only.
 - Root and dummy lockfiles use Rack `3.2.8`.
 

@@ -7,7 +7,8 @@ Update the host dependency to `recording_studio_metrics`, `~> 0.7.1`.
 
 1. No migrations in this gem.
 2. Existing metric, API, and Admin calls keep current behaviour.
-3. The dummy host pins Admin tag `v2.5.1` and no longer ships Logs or
+3. The dummy host pins Logs tag `v0.7.1` (`recording_studio >= 6.1.0`,
+   `recording_studio_metrics >= 0.6.1, < 1.0`) and no longer ships
    `test/support/widen_recording_studio_requirement.rb`. Hosts that already
    resolve Recording Studio `>= 6.1.0` do not need that file.
 
