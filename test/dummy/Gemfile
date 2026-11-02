@@ -1,5 +1,3 @@
-require_relative "../support/widen_recording_studio_requirement"
-
 source "https://rubygems.org"
 
 # Use the recording_studio_metrics engine
@@ -10,9 +8,9 @@ gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"
 gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.7.0"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.7.0"
-# Admin 2.7.0 requires Logs. Logs v0.7.0 still declares recording_studio < 5
-# and recording_studio_metrics ~> 0.6.1. The widen helper relaxes both.
-gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.0"
+# Admin 2.7.0 requires Logs. Logs v0.7.1 declares recording_studio >= 6.1.0
+# and recording_studio_metrics >= 0.6.1, < 1.0, so no Bundler spec shim is needed.
+gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.1"
 # Admin 2.7.0 loads Trashable query helpers only (require: false).
 # recording_studio_metrics is already pinned via path above (satisfies ~> 0.2).
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.0", require: false
