@@ -1,5 +1,18 @@
 # Upgrading RecordingStudioMetrics
 
+## Upgrading to 0.7.1
+
+`0.7.1` does not change metric registration, `execute`, API exposure, or Admin helper contracts.
+Update the host dependency to `recording_studio_metrics`, `~> 0.7.1`.
+
+1. No migrations in this gem.
+2. Existing metric, API, and Admin calls keep current behaviour.
+3. The dummy host pins Admin tag `v2.5.1` and no longer ships Logs or
+   `test/support/widen_recording_studio_requirement.rb`. Hosts that already
+   resolve Recording Studio `>= 6.1.0` do not need that file.
+
+If you are still on `0.7.0` or older, complete that release's notes first.
+
 ## Upgrading to 0.7.0
 
 `0.7.0` requires Recording Studio `>= 6.1.0`. Flatpack must be `>= 0.1.315`. This repository pins Flatpack ref `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`0.1.319`). Update the host dependency to `recording_studio_metrics`, `~> 0.7.0`.

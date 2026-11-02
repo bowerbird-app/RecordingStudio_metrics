@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-02
+
+### Changed
+- Dummy host pins Admin at tag `v2.5.1` and no longer depends on Logs or the Bundler specification shim.
+- Dummy root-switch `return_to` checks rescue `ActionController::RoutingError` only.
+- Root and dummy lockfiles use Rack `3.2.8`.
+
+### Upgrade notes
+- See `UPGRADING.md`. Metric, API, and Admin call contracts are unchanged.
+
 ## [0.7.0] - 2026-10-27
 
 ### Changed
@@ -117,7 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.5.0...v0.6.0

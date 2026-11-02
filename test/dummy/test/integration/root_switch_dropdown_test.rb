@@ -79,6 +79,12 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/docs/install"
   end
 
+  test "internal_route? treats unknown paths as routing errors and known paths as internal" do
+    assert internal_route?("/")
+    assert internal_route?("/docs/install")
+    refute internal_route?("/not-a-real-route")
+  end
+
   test "switching falls back to home when return_to is not a valid internal route" do
     user = User.find_or_create_by!(email: "root-switch-fallback-test@example.com") do |record|
       record.password = "Password123!"

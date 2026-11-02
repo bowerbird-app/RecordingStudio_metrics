@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioMetricsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.7.0", ::RecordingStudioMetrics::VERSION
+    assert_equal "0.7.1", ::RecordingStudioMetrics::VERSION
   end
 
   def test_engine_exists
@@ -43,17 +43,23 @@ class RecordingStudioMetricsTest < Minitest::Test
     assert_includes install_script, "fetch-skills.sh"
   end
 
+  def test_requirement_widening_shim_is_gone
+    refute defined?(WidenRecordingStudioRequirement)
+    refute File.exist?(File.expand_path("support/widen_recording_studio_requirement.rb", __dir__))
+  end
+
   def test_dummy_gemfile_pins_recording_studio_6_1
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", ref: "1fcbafe94f8eb118f0a22182f63f5110fcc97a56"'
-    assert_includes gemfile, "widen_recording_studio_requirement"
+    refute_includes gemfile, "widen_recording_studio_requirement"
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.7.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.7.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.5.1"'
+    refute_includes gemfile, "recording_studio_logs"
+    refute_includes gemfile, 'tag: "v2.7.0"'
     refute_includes gemfile, 'tag: "v2.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"'
@@ -196,7 +202,7 @@ class RecordingStudioMetricsTest < Minitest::Test
     readme_path = File.expand_path("dummy/README.md", __dir__)
     readme_source = File.read(readme_path)
 
-    assert_includes readme_source, "This Rails app exists to validate the Recording Studio addon template"
+    assert_includes readme_source, "This Rails app exists to validate Recording Studio Metrics"
     assert_includes readme_source, "/recording_studio"
     assert_includes readme_source, "redirects to `/`"
     refute_includes readme_source, "flat_pack_sidebar"
@@ -211,7 +217,8 @@ class RecordingStudioMetricsTest < Minitest::Test
     assert_includes readme, "`0.1.319`"
     assert_includes readme, "dummy GitHub tag `v0.18.0`"
     assert_includes readme, "dummy GitHub tag `v0.7.0`"
-    assert_includes readme, "dummy GitHub tag `v2.7.0`"
+    assert_includes readme, "dummy GitHub tag `v2.5.1`"
+    refute_includes readme, "dummy GitHub tag `v2.7.0`"
     refute_includes readme, "dummy GitHub tag `v2.3.0`"
     assert_includes readme, "dummy GitHub tag `v0.11.0`"
     assert_includes readme, "dummy GitHub tag `v0.5.0`"
