@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-04
+
+### Changed
+- Dummy and root lockfiles pin Recording Studio tag `v6.3.0` and FlatPack tag `v0.1.341`.
+- Dummy companion pins: Accessible `v0.24.0`, API `v0.17.1`, Logs `v0.7.2`, Trashable `v0.12.0`, Cache `v0.6.1`, Root Switchable `v0.11.3`, Admin `v2.8.2`.
+- Dummy API stays on `v0.17.1`: `v0.18.1` needs `recording_studio_moveable` `~> 4.0`, which is not on RubyGems and is not a dummy Gemfile gem.
+- Stop tracking `test/dummy/coverage/` (already gitignored as `coverage/`).
+- Dummy Root Switchable initializer leaves `config.layout` unset. Tag `v0.11.3` rejects `:application_layout`.
+
+### Upgrade notes
+- See `UPGRADING.md`. Metric, API, and Admin call contracts are unchanged. Gemspec still requires `recording_studio` `>= 6.1.0`. Hosts that want the dummy’s companion set should match these GitHub tags.
+
 ## [0.7.1] - 2026-11-02
 
 ### Changed
@@ -127,7 +139,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.0...v0.6.1
