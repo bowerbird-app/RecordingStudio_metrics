@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dummy API stays on `v0.17.1`: `v0.18.1` needs `recording_studio_moveable` `~> 4.0`, which is not on RubyGems and is not a dummy Gemfile gem.
 - Stop tracking `test/dummy/coverage/` (already gitignored as `coverage/`).
 - Dummy Root Switchable initializer leaves `config.layout` unset. Tag `v0.11.3` rejects `:application_layout`.
+- Root and dummy lockfiles use Loofah `2.25.3`, Nokogiri `1.19.7`, and `rails-html-sanitizer` `1.7.2`.
 
 ### Upgrade notes
 - See `UPGRADING.md`. Metric, API, and Admin call contracts are unchanged. Gemspec still requires `recording_studio` `>= 6.1.0`. Hosts that want the dummy’s companion set should match these GitHub tags.
