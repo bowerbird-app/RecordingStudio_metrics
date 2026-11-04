@@ -306,7 +306,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "admin widget is a real Admin widget and analytics screen is registered" do
     assert defined?(RecordingStudioAdmin::Widget)
-    assert_equal "2.7.0", RecordingStudioAdmin::VERSION
+    assert_equal "2.8.2", RecordingStudioAdmin::VERSION
 
     widget = RecordingStudioMetrics::Admin.widget("members.total", workspace_id: @alpha.id, blast_radius: :root)
     assert_instance_of RecordingStudioAdmin::Widget, widget
@@ -422,7 +422,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "api handlers map errors to rs_api statuses" do
     assert defined?(RecordingStudioApi::NotFoundError)
-    assert_equal "0.7.0", RecordingStudioApi::VERSION
+    assert_equal "0.17.1", RecordingStudioApi::VERSION
 
     context = api_context(resource: "missing", name: "total")
     assert_raises(RecordingStudioApi::NotFoundError) do

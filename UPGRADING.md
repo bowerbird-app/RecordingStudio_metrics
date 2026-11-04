@@ -1,5 +1,23 @@
 # Upgrading RecordingStudioMetrics
 
+## Upgrading to 0.7.2
+
+`0.7.2` does not change metric registration, `execute`, API exposure, or Admin helper contracts.
+The gemspec still requires `recording_studio` `>= 6.1.0`. Update the host dependency to
+`recording_studio_metrics`, `~> 0.7.2`.
+
+1. No migrations in this gem.
+2. Existing metric, API, and Admin calls keep current behaviour.
+3. This repository’s dummy host pins Recording Studio `v6.3.0`, FlatPack `v0.1.341`,
+   Accessible `v0.24.0`, API `v0.17.1` (not `v0.18.1`; that tag needs Moveable), Logs `v0.7.2`, Trashable `v0.12.0`,
+   Cache `v0.6.1`, Root Switchable `v0.11.3`, and Admin `v2.8.2`. Admin `2.8.2`
+   needs Recording Studio `>= 6.3.0` and FlatPack `>= 0.1.341`. Match those tags
+   if you want the dummy companion set.
+4. Root Switchable `0.11+` accepts `nil`, `false`, a layout name String, or
+   `call(controller:)`. The dummy no longer sets `config.layout = :application_layout`.
+
+If you are still on `0.7.1` or older, complete that release's notes first.
+
 ## Upgrading to 0.7.1
 
 `0.7.1` does not change metric registration, `execute`, API exposure, or Admin helper contracts.
