@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-11-05
+
+### Changed
+- Root and dummy lockfiles use Rails `8.1.4.1`. Rack stays `3.2.8`, Loofah `2.25.3`, Nokogiri `1.19.7`, `rails-html-sanitizer` `1.7.2`. Dummy `net-ssh` stays `7.3.8`.
+
+### Upgrade notes
+- See `UPGRADING.md`. Metric, API, and Admin call contracts are unchanged.
+
 ## [0.7.2] - 2026-11-04
 
 ### Changed
@@ -140,7 +148,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.3...HEAD
+[0.7.3]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.6.1...v0.7.0

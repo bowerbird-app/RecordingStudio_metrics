@@ -1,5 +1,16 @@
 # Upgrading RecordingStudioMetrics
 
+## Upgrading to 0.7.3
+
+`0.7.3` does not change metric registration, `execute`, API exposure, or Admin helper contracts.
+Update the host dependency to `recording_studio_metrics`, `~> 0.7.3`.
+
+1. No migrations in this gem.
+2. Existing metric, API, and Admin calls keep current behaviour.
+3. Hosts should resolve Rails `8.1.4.1` (or newer patch). This repository’s lockfiles use Rails `8.1.4.1`, Rack `3.2.8`, Loofah `2.25.3`, Nokogiri `1.19.7`, and `rails-html-sanitizer` `1.7.2`. Dummy `net-ssh` stays `7.3.8`. Companion GitHub tags are unchanged from `0.7.2`.
+
+If you are still on `0.7.2` or older, complete that release's notes first.
+
 ## Upgrading to 0.7.2
 
 `0.7.2` does not change metric registration, `execute`, API exposure, or Admin helper contracts.
