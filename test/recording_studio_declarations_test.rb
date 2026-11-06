@@ -7,8 +7,10 @@ require_relative "dummy/test/support/accessible_write_helpers"
 
 require "rails/test_help"
 
-class ActiveSupport::TestCase
-  include AccessibleWriteHelpers
+module ActiveSupport
+  class TestCase
+    include AccessibleWriteHelpers
+  end
 end
 
 class RecordingStudioDeclarationsTest < ActiveSupport::TestCase

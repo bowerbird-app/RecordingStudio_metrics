@@ -8,8 +8,10 @@ require "devise/test/integration_helpers"
 require "rails/test_help"
 require_relative "../dummy/test/support/accessible_write_helpers"
 
-class ActionDispatch::IntegrationTest
-  include AccessibleWriteHelpers
+module ActionDispatch
+  class IntegrationTest
+    include AccessibleWriteHelpers
+  end
 end
 
 class DocsControllerTest < ActionDispatch::IntegrationTest
