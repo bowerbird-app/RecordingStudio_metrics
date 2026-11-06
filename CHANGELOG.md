@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Admin adapters autoload; the gem boot path no longer requires Admin.
 - `api_authorize` remains a per-resource hook on `register`. Metrics does not teach Accessible or Admin auth.
 - Dummy and root lockfiles pin Recording Studio tag `v6.5.0`. Dummy companions: Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`, Trashable `v0.12.3`. Admin stays `v2.8.2`.
+- Dummy `config.authorize_write` uses Accessible (`:edit` on the root; Access writes via `AccessCreationContext` or `:admin`). Not `actor.present?`.
 
 ### Upgrade notes
 - See `UPGRADING.md`. Replace `RecordingStudioMetrics::Admin.widget` with `RecordingStudioAdmin::Widget.new` plus `summary_value` / `chart_series_proc`.

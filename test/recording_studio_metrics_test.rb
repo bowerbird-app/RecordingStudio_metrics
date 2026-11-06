@@ -204,6 +204,9 @@ class RecordingStudioMetricsTest < Minitest::Test
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
     assert_includes initializer_source, "config.authorize_write"
+    assert_includes initializer_source, "RecordingStudioAccessible::AccessCreationContext.allowed?"
+    refute_includes initializer_source, "->(actor:, **) { actor.present? }"
+    refute_includes initializer_source, "allow_unauthorized_writes"
     assert_includes initializer_source,
                     'config.recordable_types = [ "Workspace", "Folder", "Page", "AdminRoot", "AdminSection" ]'
     refute_includes initializer_source, "config.include_children"

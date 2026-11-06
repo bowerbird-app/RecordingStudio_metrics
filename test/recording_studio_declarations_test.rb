@@ -3,8 +3,13 @@
 ENV["RAILS_ENV"] = "test"
 require_relative "test_helper"
 require_relative "dummy/config/environment"
+require_relative "dummy/test/support/accessible_write_helpers"
 
 require "rails/test_help"
+
+class ActiveSupport::TestCase
+  include AccessibleWriteHelpers
+end
 
 class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   setup do
@@ -30,6 +35,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     workspace = Workspace.create!(name: unique_name("Root Workspace"))
 
     root_recording = RecordingStudio.root_recording_for(workspace)
+    grant_admin!(Current.actor, root_recording)
 
     assert_predicate root_recording, :persisted?
     assert_equal workspace, root_recording.recordable
@@ -39,6 +45,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "allowed child can be recorded under a workspace root" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Child Workspace")))
+    grant_admin!(Current.actor, root_recording)
     folder = Folder.new(name: unique_name("Allowed Folder"))
 
     event = RecordingStudio.record!(
@@ -54,6 +61,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "page can be recorded under allowed workspace and folder parents" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Page Workspace")))
+    grant_admin!(Current.actor, root_recording)
     folder_recording = record_child(Folder.new(name: unique_name("Page Folder")), root_recording, root_recording)
 
     workspace_page_recording = record_child(
@@ -77,6 +85,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "parentless child under an existing root is invalid" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Parentless Workspace")))
+    grant_admin!(Current.actor, root_recording)
     folder = Folder.create!(name: unique_name("Parentless Folder"))
     recording = RecordingStudio::Recording.new(root_recording: root_recording, recordable: folder)
 
@@ -86,6 +95,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
   test "page cannot be recorded under another page" do
     root_recording = RecordingStudio.root_recording_for(Workspace.create!(name: unique_name("Invalid Page Workspace")))
+    grant_admin!(Current.actor, root_recording)
     page_recording = record_child(Page.new(title: unique_name("Parent Page")), root_recording, root_recording)
 
     error = assert_raises(RecordingStudio::InvalidParent) do

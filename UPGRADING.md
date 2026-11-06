@@ -16,8 +16,10 @@ Accessible. Update the host dependency to `recording_studio_metrics`, `~> 0.8.0`
    Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`,
    Trashable `v0.12.3`, Cache `v0.6.1`, Root Switchable `v0.11.3`, and Admin `v2.8.2`.
    Admin stays on that dummy pin (off the 2.5.1 host policy). Gemspec still requires
-   `recording_studio` `>= 6.1.0`. Recording Studio `6.5.0` needs `config.authorize_write`;
-   the dummy sets `->(actor:, **) { actor.present? }` so seeds and tests can write.
+   `recording_studio` `>= 6.1.0`. Recording Studio `6.5.0` needs `config.authorize_write`.
+   The dummy delegates that gate to Accessible (`:edit` on the root, Access writes via
+   `AccessCreationContext` or `:admin`). It does not use `actor.present?` or
+   `allow_unauthorized_writes`.
 
 If you are still on `0.7.3` or older, complete that release's notes first.
 

@@ -6,6 +6,11 @@ require_relative "../dummy/config/environment"
 
 require "devise/test/integration_helpers"
 require "rails/test_help"
+require_relative "../dummy/test/support/accessible_write_helpers"
+
+class ActionDispatch::IntegrationTest
+  include AccessibleWriteHelpers
+end
 
 class DocsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -79,6 +84,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
   test "recordings tree page renders successfully" do
     workspace = Workspace.create!(name: "Tree Workspace")
     root_recording = RecordingStudio.root_recording_for(workspace)
+    grant_admin!(@user, root_recording)
     folder = Folder.create!(name: "Reference")
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
@@ -91,10 +97,10 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Workspace: Tree Workspace"
     assert_includes response.body, "Folder: Reference"
     assert_includes response.body, "Page: API"
+    assert_includes response.body, "Access: Admin for docs-test@example.com"
     refute_includes response.body, "Access boundary"
-    refute_includes response.body, "Access: Admin"
     assert_select "div[role='tree']", count: 1
-    assert_select "[role='treeitem']", minimum: 3
+    assert_select "[role='treeitem']", minimum: 4
     refute_includes response.body, "Current structure"
     refute_includes response.body, "This tree is generated from RecordingStudio::Recording records"
   end
@@ -138,10 +144,12 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Counted Workspace")
     2.times do
-      RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
+      extra = RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
+      grant_admin!(@user, extra)
     end
 
     root_recording = RecordingStudio.root_recording_for(workspace)
+    grant_admin!(@user, root_recording)
     folder = Folder.create!(name: "Counted Folder")
     record_child(folder, root_recording, root_recording)
 

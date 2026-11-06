@@ -192,6 +192,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
   test "recordable model metrics use recordable_root_relation" do
     Current.actor = @actor
     root = RecordingStudio.root_recording_for(@alpha)
+    grant_admin!(@actor, root)
     folder = Folder.create!(name: "Docs #{SecureRandom.hex(4)}")
     RecordingStudio.record!(
       action: "created",
@@ -200,6 +201,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       parent_recording: root
     )
     other_root = RecordingStudio.root_recording_for(@beta)
+    grant_admin!(@actor, other_root)
     other_folder = Folder.create!(name: "Other #{SecureRandom.hex(4)}")
     RecordingStudio.record!(
       action: "created",
@@ -241,6 +243,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
   test "recording scope isolates the access recordable" do
     Current.actor = @actor
     root = RecordingStudio.root_recording_for(@alpha)
+    grant_admin!(@actor, root)
     folder = Folder.create!(name: "Scoped #{SecureRandom.hex(4)}")
     recording = RecordingStudio.record!(
       action: "created",
