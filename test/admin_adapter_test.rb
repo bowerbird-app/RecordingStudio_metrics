@@ -38,13 +38,12 @@ class AdminAdapterTest < Minitest::Test
     end
   end
 
-  def test_widget_builder_requires_admin_gem
-    skip if defined?(RecordingStudioAdmin::Widget)
+  def test_admin_adapter_does_not_construct_admin_widgets
+    refute RecordingStudioMetrics::Admin.respond_to?(:widget)
+    refute RecordingStudioMetrics::Admin.respond_to?(:build_admin_widget)
 
-    error = assert_raises(LoadError) do
-      RecordingStudioMetrics::Admin.widget("users.total")
-    end
-    assert_match(/RecordingStudioAdmin is not available/, error.message)
+    source = File.read(File.expand_path("../lib/recording_studio_metrics/admin.rb", __dir__))
+    refute_match(/RecordingStudioAdmin/, source)
   end
 
   def test_execute_passes_chosen_screen_filter_values

@@ -7,6 +7,18 @@ require_relative "dummy/config/environment"
 require "rails/test_help"
 
 class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
+  setup do
+    Current.actor = User.find_by(email: "admin@admin.com") || User.create!(
+      email: "declarations-#{SecureRandom.hex(4)}@example.com",
+      password: "Password",
+      password_confirmation: "Password"
+    )
+  end
+
+  teardown do
+    Current.actor = nil
+  end
+
   test "dummy recordable declarations validate and expose parent/root introspection" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_equal %w[AdminRoot Workspace], RecordingStudio.root_recordable_types.sort

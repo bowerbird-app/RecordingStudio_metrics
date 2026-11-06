@@ -19,6 +19,11 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     end
 
     sign_in @user
+    Current.actor = @user
+  end
+
+  teardown do
+    Current.actor = nil
   end
 
   test "install page renders successfully" do
