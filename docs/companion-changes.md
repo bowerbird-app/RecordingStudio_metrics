@@ -2,9 +2,9 @@
 
 RecordingStudioMetrics integrates only through extension points the companion gems already expose. This run does not open PRs on those repositories.
 
-## RecordingStudio_api (v0.17.1)
+## RecordingStudio_api (v0.18.4)
 
-Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422. The dummy pin is GitHub tag `v0.17.1` (Trashable query-only keep/trash checks; no API migration). `v0.18.1` needs Moveable and is not pinned.
+Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422. The dummy pin is GitHub tag `v0.18.4`. That tag needs Moveable `~> 4.0`; the dummy pins Moveable `v4.1.1` and Icons `v0.2.1` with `require: false`.
 
 1. Dispatch registered endpoints by HTTP verb as well as path. **Done in RS_API v0.6.7+** (`registered_endpoint_request_match` uses `match(path:, http_verb:)`). Metrics stays GET-only by registration, not because the dispatcher ignores the verb.
 
@@ -15,7 +15,7 @@ Needed from the API gem:
 
 ## RecordingStudio_admin (v2.8.2)
 
-Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: [{ x:, y: }] }` series, builds a standalone `RecordingStudioAdmin::Widget` when Admin is loaded, maps chosen metric filters onto `Screen.filter` via `Admin.attach_filters(screen, identifier, only:)`, passes the screen's chosen filter values into `execute`, and supplies `summary_value` / `chart_series_proc` callables for existing Screen `summary` / `chart` DSLs. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs. The dummy pin is GitHub tag `v2.8.2`. Admin `v2.8.2` also loads RecordingStudio_logs. The dummy pin for Logs is GitHub tag `v0.7.2`.
+Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: [{ x:, y: }] }` series. It does not construct `RecordingStudioAdmin::Widget` or authorize Admin. The dummy host builds Admin widgets with Admin's Widget API and `summary_value` / `chart_series_proc`. `Admin.attach_filters(screen, identifier, only:)` maps chosen metric filters onto `Screen.filter` and passes chosen filter values into `execute`. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs. The dummy pin is GitHub tag `v2.8.2` (off the 2.5.1 host policy; left unchanged). Admin `v2.8.2` also loads RecordingStudio_logs. The dummy pin for Logs is GitHub tag `v0.7.4`.
 
 Needed from the Admin gem:
 

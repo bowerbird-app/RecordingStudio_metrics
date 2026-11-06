@@ -37,13 +37,6 @@ module RecordingStudioMetrics
       }
     end
 
-    def widget(identifier, type: :number, **options)
-      raise LoadError, "RecordingStudioAdmin is not available" unless defined?(RecordingStudioAdmin::Widget)
-
-      definition = RecordingStudioMetrics.registry.fetch(identifier)
-      build_admin_widget(definition, identifier, type, options)
-    end
-
     def attach_filters(screen_class, identifier, only:)
       definition = RecordingStudioMetrics.registry.fetch(identifier)
       names = Array(only).map(&:to_sym)
@@ -116,29 +109,6 @@ module RecordingStudioMetrics
         { start: value.start_date, end: value.end_date }
       else
         value
-      end
-    end
-
-    def build_admin_widget(definition, identifier, type, options)
-      key = options.delete(:key) || "metrics.#{identifier}"
-      blast_radius = options.delete(:blast_radius)
-      title_value = options.delete(:title) || definition.title || definition.name.to_s.humanize
-      chart_type_value = options.delete(:chart_type) || definition.preferred_chart || :line
-      execute_params = options.slice(:interval, :start_at, :end_at, :filters, :scope, :workspace_id, :site_authorized)
-
-      RecordingStudioAdmin::Widget.new(key, blast_radius: blast_radius) do
-        type type
-        title title_value
-        if type.to_sym == :chart
-          chart_type chart_type_value
-          series lambda { |admin_context|
-            RecordingStudioMetrics::Admin.chart_series(identifier, admin_context: admin_context, **execute_params)
-          }
-        else
-          value lambda { |admin_context|
-            RecordingStudioMetrics::Admin.scalar_value(identifier, admin_context: admin_context, **execute_params)
-          }
-        end
       end
     end
   end

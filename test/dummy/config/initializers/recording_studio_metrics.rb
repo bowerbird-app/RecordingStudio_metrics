@@ -137,15 +137,22 @@ Rails.application.config.to_prepare do
   if defined?(RecordingStudioAdmin::Widget)
     MetricsAnalyticsScreen.attach_selected_metric_filters!
     RecordingStudioAdmin.register_widget(
-      RecordingStudioMetrics::Admin.widget("members.total", blast_radius: :root)
+      RecordingStudioAdmin::Widget.new("metrics.members.total", blast_radius: :root) do
+        type :number
+        title "Total members"
+        value RecordingStudioMetrics::Admin.summary_value("members.total")
+      end
     )
     RecordingStudioAdmin.register_widget(
-      RecordingStudioMetrics::Admin.widget(
-        "members.registrations",
-        type: :chart,
-        blast_radius: :root,
-        interval: :month
-      )
+      RecordingStudioAdmin::Widget.new("metrics.members.registrations", blast_radius: :root) do
+        type :chart
+        chart_type :line
+        title "Member registrations"
+        series RecordingStudioMetrics::Admin.chart_series_proc(
+          "members.registrations",
+          interval: :month
+        )
+      end
     )
     RecordingStudioAdmin.register_screen(MetricsAnalyticsScreen)
   end

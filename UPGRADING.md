@@ -1,5 +1,28 @@
 # Upgrading RecordingStudioMetrics
 
+## Upgrading to 0.8.0
+
+`0.8.0` keeps metric registration, `execute`, API exposure, and Admin result adapters.
+It removes `RecordingStudioMetrics::Admin.widget`. Metrics does not authorize Admin or
+Accessible. Update the host dependency to `recording_studio_metrics`, `~> 0.8.0`.
+
+1. No migrations in this gem.
+2. Existing `execute`, `scalar_value`, `chart_series`, `summary_value`, `chart_series_proc`,
+   and `attach_filters` calls keep current behaviour.
+3. Replace `RecordingStudioMetrics::Admin.widget(...)` with an Admin widget registered by
+   the owning gem or host. Pass `RecordingStudioMetrics::Admin.summary_value` or
+   `chart_series_proc` into that widget. `api_authorize:` stays on the registering gem.
+4. This repository’s dummy host pins Recording Studio `v6.5.0`, FlatPack `v0.1.341`,
+   Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`,
+   Trashable `v0.12.3`, Cache `v0.6.1`, Root Switchable `v0.11.3`, and Admin `v2.8.2`.
+   Admin stays on that dummy pin (off the 2.5.1 host policy). Gemspec still requires
+   `recording_studio` `>= 6.1.0`. Recording Studio `6.5.0` needs `config.authorize_write`.
+   The dummy delegates that gate to Accessible (`:edit` on the root, Access writes via
+   `AccessCreationContext` or `:admin`). It does not use `actor.present?` or
+   `allow_unauthorized_writes`.
+
+If you are still on `0.7.3` or older, complete that release's notes first.
+
 ## Upgrading to 0.7.3
 
 `0.7.3` does not change metric registration, `execute`, API exposure, or Admin helper contracts.
