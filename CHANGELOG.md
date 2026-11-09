@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-06
+
+### Changed
+- Metrics stays a thin counter. `RecordingStudioMetrics::Admin` no longer checks for or builds `RecordingStudioAdmin::Widget`. Hosts and owning gems register Admin widgets with Admin, then call `summary_value` / `chart_series_proc`.
+- Admin adapters autoload; the gem boot path no longer requires Admin.
+- `api_authorize` remains a per-resource hook on `register`. Metrics does not teach Accessible or Admin auth.
+- Dummy and root lockfiles pin Recording Studio tag `v6.5.0`. Dummy companions: Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`, Trashable `v0.12.3`. Admin stays `v2.8.2`.
+- Dummy `config.authorize_write` uses Accessible (`:edit` on the root; Access writes via `AccessCreationContext` or `:admin`). Not `actor.present?`.
+
+### Upgrade notes
+- See `UPGRADING.md`. Replace `RecordingStudioMetrics::Admin.widget` with `RecordingStudioAdmin::Widget.new` plus `summary_value` / `chart_series_proc`.
+
 ## [0.7.3] - 2026-11-05
 
 ### Changed
@@ -148,7 +160,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.0...v0.7.1

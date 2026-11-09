@@ -25,9 +25,10 @@ require "recording_studio_metrics/calculators/custom"
 require "recording_studio_metrics/cache"
 require "recording_studio_metrics/executor"
 require "recording_studio_metrics/api"
-require "recording_studio_metrics/admin"
 
 module RecordingStudioMetrics
+  autoload :Admin, "recording_studio_metrics/admin"
+
   class << self
     attr_writer :configuration
 

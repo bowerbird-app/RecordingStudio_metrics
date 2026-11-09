@@ -4,7 +4,7 @@ Shared metrics and analytics for Recording Studio recordables and ordinary Activ
 
 This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic. Upgrade notes live in `UPGRADING.md`.
 
-Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v6.3.0`, Accessible dummy GitHub tag `v0.24.0`, Root Switchable dummy GitHub tag `v0.11.3`, API dummy GitHub tag `v0.17.1`, Admin dummy GitHub tag `v2.8.2`, Logs dummy GitHub tag `v0.7.2`, Trashable dummy GitHub tag `v0.12.0` (`require: false`), Cache dummy GitHub tag `v0.6.1`, FlatPack dummy GitHub tag `v0.1.341`.
+Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v6.5.0`, Accessible dummy GitHub tag `v0.24.2`, Root Switchable dummy GitHub tag `v0.11.3`, API dummy GitHub tag `v0.18.4`, Moveable dummy GitHub tag `v4.1.1` (`require: false`, for API), Icons dummy GitHub tag `v0.2.1` (`require: false`, for Moveable), Admin dummy GitHub tag `v2.8.2`, Logs dummy GitHub tag `v0.7.4`, Trashable dummy GitHub tag `v0.12.3` (`require: false`), Cache dummy GitHub tag `v0.6.1`, FlatPack dummy GitHub tag `v0.1.341`.
 
 ## Architecture
 
@@ -145,17 +145,35 @@ RecordingStudioMetrics.register(
   :users,
   model: User,
   blast_radius: :site,
-  api_authorize: ->(context) { MyGem::Access.staff?(context.actor) }
+  api_authorize: ->(context) {
+    RecordingStudioAccessible.authorized?(
+      actor: context.actor,
+      recording: context.access_recording,
+      role: :view
+    )
+  }
 ) do
   count :total, title: "Everyone on the site", expose: { api: [:admin] }
 end
 ```
 
-`api_authorize` receives the RS_API request context. Falsy denies with 403 and hides the metric from discovery. Truthy on a `blast_radius: :site` resource grants site scope for that call. Omit it and `Context.from_api` behaves as before.
+`api_authorize` stays on the registering gem. Metrics does not teach Accessible or Admin auth. The hook receives the RS_API request context. Falsy denies with 403 and hides the metric from discovery. Truthy on a `blast_radius: :site` resource grants site scope for that call. Omit it and `Context.from_api` behaves as before.
 
 ## Admin integration
 
-Optional. Requires RecordingStudio_admin. Use `RecordingStudioMetrics::Admin.scalar_value` / `chart_series`, or `Admin.widget` to build a standalone Admin widget. `chart_series` returns `[{ name:, data: [{ x:, y: }, ...] }]`, the point shape ApexCharts 3.45.1 plots. Host screens can also use `summary_value`, `chart_series_proc`, and `attach_filters(..., only:)` against the existing Screen `summary` / `chart` / `widget` / `filter` API. Chosen screen filter values are passed into `execute`. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.
+Optional result adapters. `RecordingStudioMetrics::Admin` maps an Admin (or host) context into `execute` and formats scalars / `{ name:, data: [{ x:, y: }] }` series. It does not authorize Admin, build Admin widgets, or check Accessible. Admin's mount gate stays Accessible. The gem or host that owns the screen registers widgets with Admin:
+
+```ruby
+RecordingStudioAdmin.register_widget(
+  RecordingStudioAdmin::Widget.new("metrics.members.total", blast_radius: :root) do
+    type :number
+    title "Total members"
+    value RecordingStudioMetrics::Admin.summary_value("members.total")
+  end
+)
+```
+
+`chart_series` returns `[{ name:, data: [{ x:, y: }, ...] }]`, the point shape ApexCharts 3.45.1 plots. Host screens can also use `summary_value`, `chart_series_proc`, and `attach_filters(..., only:)` against the existing Screen `summary` / `chart` / `widget` / `filter` API. Chosen screen filter values are passed into `execute`. Screen has no `metric_card` / `metric_chart` hook yet; do not monkey-patch Screen.
 
 ## Caching
 
