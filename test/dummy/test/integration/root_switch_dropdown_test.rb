@@ -116,10 +116,24 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
   # Root Switchable 0.15 forbids the mounted switcher unless the actor can
   # view the current root. The dummy lists every workspace, so the current
-  # root may be a seeded one this user does not own yet.
+  # root may be a seeded one this user does not own yet. Bootstrap only the
+  # empty roots; seeded roots already have an owner, so grant :view through
+  # that owner.
   def grant_view_on_workspace_roots!(user)
     Workspace.find_each do |workspace|
-      grant_admin!(user, RecordingStudio.root_recording_for(workspace))
+      recording = RecordingStudio.root_recording_for(workspace)
+      next if RecordingStudioAccessible.authorized?(actor: user, recording: recording, role: :view)
+
+      bootstrapped = RecordingStudioAccessible.bootstrap_owner_access!(recording: recording, actor: user)
+      next if bootstrapped.respond_to?(:success?) && bootstrapped.success?
+
+      granted = RecordingStudioAccessible.grant_access(
+        recording: recording,
+        actor: user,
+        role: :view,
+        manager_actor: User.find_by!(email: "admin@admin.com")
+      )
+      raise granted.error if granted.respond_to?(:failure?) && granted.failure?
     end
   end
 end
