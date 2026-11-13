@@ -4,7 +4,7 @@ Shared metrics and analytics for Recording Studio recordables and ordinary Activ
 
 This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic. Upgrade notes live in `UPGRADING.md`.
 
-Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v6.5.0`, Accessible dummy GitHub tag `v0.24.2`, Root Switchable dummy GitHub tag `v0.11.3`, API dummy GitHub tag `v0.18.4`, Moveable dummy GitHub tag `v4.1.1` (`require: false`, for API), Icons dummy GitHub tag `v0.2.1` (`require: false`, for Moveable), Admin dummy GitHub tag `v2.8.2`, Logs dummy GitHub tag `v0.7.4`, Trashable dummy GitHub tag `v0.12.3` (`require: false`), Cache dummy GitHub tag `v0.6.1`, FlatPack dummy GitHub tag `v0.1.341`.
+Companion pins used by the dummy host: Recording Studio dummy GitHub tag `v6.7.0`, Accessible dummy GitHub tag `v0.31.0`, Root Switchable dummy GitHub tag `v0.15.0`, API dummy GitHub tag `v0.22.1`, Moveable dummy GitHub tag `v4.1.1` (`require: false`, for API), Icons dummy GitHub tag `v0.2.1` (`require: false`, for Moveable), Admin dummy GitHub tag `v2.13.0`, Logs dummy GitHub tag `v0.7.4`, Trashable dummy GitHub tag `v0.14.0` (`require: false`), Cache dummy GitHub tag `v0.6.3`, FlatPack dummy GitHub tag `v0.1.356`.
 
 ## Architecture
 

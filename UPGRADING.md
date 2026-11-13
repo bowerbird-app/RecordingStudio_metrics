@@ -1,5 +1,9 @@
 # Upgrading RecordingStudioMetrics
 
+## Current dummy pins
+
+Gem version stays `0.8.0`. The root and dummy Gemfiles pin Recording Studio `v6.7.0` and FlatPack `v0.1.356`. The dummy also pins Accessible `v0.31.0`, API `v0.22.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, Logs `v0.7.4`, Trashable `v0.14.0`, Cache `v0.6.3`, and Root Switchable `v0.15.0`. The gemspec still requires `recording_studio` `>= 6.1.0`.
+
 ## Upgrading to 0.8.0
 
 `0.8.0` keeps metric registration, `execute`, API exposure, and Admin result adapters.
@@ -12,11 +16,11 @@ Accessible. Update the host dependency to `recording_studio_metrics`, `~> 0.8.0`
 3. Replace `RecordingStudioMetrics::Admin.widget(...)` with an Admin widget registered by
    the owning gem or host. Pass `RecordingStudioMetrics::Admin.summary_value` or
    `chart_series_proc` into that widget. `api_authorize:` stays on the registering gem.
-4. This repository’s dummy host pins Recording Studio `v6.5.0`, FlatPack `v0.1.341`,
-   Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`,
-   Trashable `v0.12.3`, Cache `v0.6.1`, Root Switchable `v0.11.3`, and Admin `v2.8.2`.
-   Admin stays on that dummy pin (off the 2.5.1 host policy). Gemspec still requires
-   `recording_studio` `>= 6.1.0`. Recording Studio `6.5.0` needs `config.authorize_write`.
+4. At the `0.8.0` release, this repository’s dummy host pinned Recording Studio `v6.5.0`,
+   FlatPack `v0.1.341`, Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`,
+   Logs `v0.7.4`, Trashable `v0.12.3`, Cache `v0.6.1`, Root Switchable `v0.11.3`, and Admin `v2.8.2`.
+   Current pins are in the section above. Gemspec still requires `recording_studio` `>= 6.1.0`.
+   Recording Studio `6.5.0` and later need `config.authorize_write`.
    The dummy delegates that gate to Accessible (`:edit` on the root, Access writes via
    `AccessCreationContext` or `:admin`). It does not use `actor.present?` or
    `allow_unauthorized_writes`.

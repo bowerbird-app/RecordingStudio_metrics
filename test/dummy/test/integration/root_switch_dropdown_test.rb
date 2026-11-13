@@ -47,6 +47,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Switch Page Workspace")
     RecordingStudio.root_recording_for(workspace)
+    grant_view_on_workspace_roots!(user)
 
     get "/recording_studio_root_switchable/v1/root_switch?scope=all_workspaces"
 
@@ -67,6 +68,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     target_workspace = Workspace.create!(name: "Target Workspace")
     target_root_recording = RecordingStudio.root_recording_for(target_workspace)
     RecordingStudio.root_recording_for(source_workspace)
+    grant_view_on_workspace_roots!(user)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -97,6 +99,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     target_workspace = Workspace.create!(name: "Fallback Target Workspace")
     target_root_recording = RecordingStudio.root_recording_for(target_workspace)
     RecordingStudio.root_recording_for(source_workspace)
+    grant_view_on_workspace_roots!(user)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -107,5 +110,16 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     }
 
     assert_redirected_to "/"
+  end
+
+  private
+
+  # Root Switchable 0.15 forbids the mounted switcher unless the actor can
+  # view the current root. The dummy lists every workspace, so the current
+  # root may be a seeded one this user does not own yet.
+  def grant_view_on_workspace_roots!(user)
+    Workspace.find_each do |workspace|
+      grant_admin!(user, RecordingStudio.root_recording_for(workspace))
+    end
   end
 end
