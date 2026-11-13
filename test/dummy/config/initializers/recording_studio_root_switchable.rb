@@ -7,6 +7,8 @@ RecordingStudioRootSwitchable.configure do |config|
 
   # nil uses RecordingStudio.configuration.layout, then recording_studio/default_layout.
   # Root Switchable 0.11+ rejects :application_layout (Layout.accept).
+  # Root Switchable 0.15 also requires Accessible :view on the current root
+  # before the mounted switcher renders. Hosts cannot skip that check.
 
   config.after_switch_redirect = lambda do |controller:, return_to:, **|
     candidate_path = return_to.presence
