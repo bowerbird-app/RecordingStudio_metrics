@@ -2,7 +2,7 @@
 
 ## Current dummy pins
 
-Gem version stays `0.8.0`. The root and dummy Gemfiles pin Recording Studio `v6.7.0` and FlatPack `v0.1.356`. The dummy also pins Accessible `v0.31.0`, API `v0.22.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, Logs `v0.7.4`, Trashable `v0.14.0`, Cache `v0.6.3`, and Root Switchable `v0.15.0`. The gemspec still requires `recording_studio` `>= 6.1.0`.
+Gem version stays `0.8.0`. The root and dummy Gemfiles pin Recording Studio `v6.10.0` and FlatPack `v0.1.366`. The dummy also pins Accessible `v0.37.0`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, Logs `v0.7.4`, Trashable `v0.14.1`, Cache `v0.6.3`, and Root Switchable `v0.15.0`. Recording Studio `6.9.0` stores `root_recording_id` on events; the dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. The gemspec still requires `recording_studio` `>= 6.1.0`.
 
 ## Upgrading to 0.8.0
 

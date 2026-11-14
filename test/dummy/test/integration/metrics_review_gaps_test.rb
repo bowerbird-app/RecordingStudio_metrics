@@ -426,7 +426,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "api handlers map errors to rs_api statuses" do
     assert defined?(RecordingStudioApi::NotFoundError)
-    assert_equal "0.22.1", RecordingStudioApi::VERSION
+    assert_equal "0.23.1", RecordingStudioApi::VERSION
 
     context = api_context(resource: "missing", name: "total")
     assert_raises(RecordingStudioApi::NotFoundError) do
