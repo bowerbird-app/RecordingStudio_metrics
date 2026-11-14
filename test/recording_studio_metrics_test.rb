@@ -53,24 +53,29 @@ class RecordingStudioMetricsTest < Minitest::Test
   def test_dummy_gemfile_pins_recording_studio_6_1
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.7.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.356"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.10.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.366"'
     refute_includes gemfile, "widen_recording_studio_requirement"
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.31.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.37.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.15.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.22.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.13.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"'
     refute_includes gemfile, 'tag: "v2.3.0"'
     refute_includes gemfile, 'tag: "v2.8.2"'
+    refute_includes gemfile, 'tag: "v6.7.0"'
     refute_includes gemfile, 'tag: "v6.5.0"'
+    refute_includes gemfile, 'tag: "v0.1.356"'
     refute_includes gemfile, 'tag: "v0.1.341"'
+    refute_includes gemfile, 'tag: "v0.31.0"'
     refute_includes gemfile, 'tag: "v0.24.2"'
+    refute_includes gemfile, 'tag: "v0.22.1"'
     refute_includes gemfile, 'tag: "v0.11.3"'
     refute_includes gemfile, 'tag: "v0.18.4"'
+    refute_includes gemfile, 'tag: "v0.14.0"'
     refute_includes gemfile, 'tag: "v0.12.3"'
     refute_includes gemfile, 'tag: "v0.6.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.14.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.14.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.3"'
     assert_match(/^gem ["']recording_studio_cache["']/, gemfile)
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"'
@@ -101,9 +106,11 @@ class RecordingStudioMetricsTest < Minitest::Test
     refute_includes initializer, "config.layout ="
 
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.7.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.356"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.10.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.366"'
+    refute_includes root_gemfile, 'tag: "v6.7.0"'
     refute_includes root_gemfile, 'tag: "v6.5.0"'
+    refute_includes root_gemfile, 'tag: "v0.1.356"'
     refute_includes root_gemfile, 'tag: "v0.1.341"'
   end
 
@@ -146,6 +153,18 @@ class RecordingStudioMetricsTest < Minitest::Test
     )
     assert_includes constraints_migration, "create_table :recording_studio_access_constraints"
     assert_includes rules_migration, "create_table :recording_studio_access_rules"
+
+    events_migration = File.read(
+      File.expand_path(
+        "dummy/db/migrate/20261114090000_add_root_recording_id_to_recording_studio_events.rb",
+        __dir__
+      )
+    )
+    events_table = schema[/create_table "recording_studio_events".*?^  end/m]
+    assert_includes events_table, 't.uuid "root_recording_id", null: false'
+    assert_includes events_table, "index_rs_events_on_root_and_timeline"
+    assert_includes events_migration, "add_column :recording_studio_events, :root_recording_id, :uuid"
+    assert_includes events_migration, "change_column_null :recording_studio_events, :root_recording_id, false"
   end
 
   def test_template_does_not_ship_copied_core_hooks_or_base_service
@@ -237,21 +256,26 @@ class RecordingStudioMetricsTest < Minitest::Test
     readme = File.read(File.expand_path("../README.md", __dir__))
 
     assert_includes readme, "RecordingStudio"
-    assert_includes readme, "dummy GitHub tag `v6.7.0`"
-    assert_includes readme, "dummy GitHub tag `v0.1.356`"
-    assert_includes readme, "dummy GitHub tag `v0.31.0`"
-    assert_includes readme, "dummy GitHub tag `v0.22.1`"
+    assert_includes readme, "dummy GitHub tag `v6.10.0`"
+    assert_includes readme, "dummy GitHub tag `v0.1.366`"
+    assert_includes readme, "dummy GitHub tag `v0.37.0`"
+    assert_includes readme, "dummy GitHub tag `v0.23.1`"
     assert_includes readme, "dummy GitHub tag `v2.13.0`"
     refute_includes readme, "dummy GitHub tag `v2.3.0`"
     refute_includes readme, "dummy GitHub tag `v2.8.2`"
+    refute_includes readme, "dummy GitHub tag `v6.7.0`"
     refute_includes readme, "dummy GitHub tag `v6.5.0`"
+    refute_includes readme, "dummy GitHub tag `v0.1.356`"
     refute_includes readme, "dummy GitHub tag `v0.1.341`"
+    refute_includes readme, "dummy GitHub tag `v0.31.0`"
     refute_includes readme, "dummy GitHub tag `v0.24.2`"
+    refute_includes readme, "dummy GitHub tag `v0.22.1`"
     refute_includes readme, "dummy GitHub tag `v0.18.4`"
     refute_includes readme, "dummy GitHub tag `v0.12.3`"
     refute_includes readme, "dummy GitHub tag `v0.6.1`"
     refute_includes readme, "dummy GitHub tag `v0.11.3`"
-    assert_includes readme, "dummy GitHub tag `v0.14.0`"
+    assert_includes readme, "dummy GitHub tag `v0.14.1`"
+    refute_includes readme, "dummy GitHub tag `v0.14.0`"
     assert_includes readme, "dummy GitHub tag `v0.6.3`"
     assert_includes readme, "dummy GitHub tag `v0.15.0`"
     refute_includes readme, "dummy GitHub tag `v4.7.0`"

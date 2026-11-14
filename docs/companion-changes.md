@@ -2,9 +2,9 @@
 
 RecordingStudioMetrics integrates only through extension points the companion gems already expose. This run does not open PRs on those repositories.
 
-## RecordingStudio_api (v0.22.1)
+## RecordingStudio_api (v0.23.1)
 
-Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422. The dummy pin is GitHub tag `v0.22.1`. That tag needs Moveable `~> 4.0`, Logs, and Trashable; the dummy pins Moveable `v4.1.1` and Icons `v0.2.1` with `require: false`.
+Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioApi.register_endpoint` for GET-only `metrics` and `metrics/:resource/:name`. Handlers call `discover` / `execute`. Unknown, unauthorized, and invalid-filter errors are raised as `RecordingStudioApi::NotFoundError`, `AuthorizationError`, and `InvalidActionInputError` so `ApiController` maps them to 404 / 403 / 422. The dummy pin is GitHub tag `v0.23.1`. That tag needs Moveable `~> 4.0`, Logs, and Trashable; the dummy pins Moveable `v4.1.1` and Icons `v0.2.1` with `require: false`.
 
 1. Dispatch registered endpoints by HTTP verb as well as path. **Done in RS_API v0.6.7+** (`registered_endpoint_request_match` uses `match(path:, http_verb:)`). Metrics stays GET-only by registration, not because the dispatcher ignores the verb.
 
