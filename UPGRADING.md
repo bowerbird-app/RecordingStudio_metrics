@@ -2,7 +2,7 @@
 
 ## Current dummy pins
 
-Gem version stays `0.8.0`. The root and dummy Gemfiles pin Recording Studio `v6.10.0` and FlatPack `v0.1.366`. The dummy also pins Accessible `v0.37.0`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, Logs `v0.7.4`, Trashable `v0.14.1`, Cache `v0.6.3`, and Root Switchable `v0.15.0`. Recording Studio `6.9.0` stores `root_recording_id` on events; the dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. The gemspec still requires `recording_studio` `>= 6.1.0`.
+Gem version stays `0.8.0`. The root and dummy Gemfiles pin Recording Studio `v6.14.0` and FlatPack `v0.1.374`. The dummy also pins Accessible `v0.41.0`, API `v0.23.3`, Moveable `v4.2.0`, Icons `v0.2.1`, Admin `v2.13.1`, Logs `v0.7.5`, Trashable `v0.16.0`, Cache `v0.6.3`, and Root Switchable `v0.15.0`. Recording Studio `6.9.0` stores `root_recording_id` on events; the dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. Core `6.11.0` through `6.14.0` add no migrations. Accessible `0.41.0` needs Recording Studio `>= 6.13.0`. Trashable `0.16.0` removes `Recording.recording_studio_trashable_kept_sql`. The dummy seeds call `RecordingStudio.kept_sql`, and `config/initializers/recording_studio_trashable.rb` defines the old class method as that call because Accessible `0.41.0`, Admin `2.13.1`, and API `0.23.3` still use it. The gemspec still requires `recording_studio` `>= 6.1.0`.
 
 ## Upgrading to 0.8.0
 

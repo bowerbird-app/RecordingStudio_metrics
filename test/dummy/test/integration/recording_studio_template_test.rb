@@ -29,6 +29,11 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
 
   test "dummy seeds use hierarchy idempotently and restore current actor" do
     Current.actor = nil
+    seeds = File.read(Rails.root.join("db/seeds.rb"))
+    assert_includes seeds, "RecordingStudio.kept_sql"
+    refute_includes seeds, "recording_studio_trashable_kept_sql"
+    assert_equal RecordingStudio.kept_sql, RecordingStudio::Recording.recording_studio_trashable_kept_sql
+    assert_equal RecordingStudio.kept_sql("child"), RecordingStudio::Recording.recording_studio_trashable_kept_sql("child")
 
     load Rails.root.join("db/seeds.rb").to_s
 
