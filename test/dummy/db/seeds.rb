@@ -4,7 +4,7 @@
 
 find_or_record_child = lambda do |recordable, root_recording, parent_recording|
   RecordingStudio::Recording.where(
-    RecordingStudio::Recording.recording_studio_trashable_kept_sql
+    RecordingStudio.kept_sql
   ).find_by(
     root_recording: root_recording,
     parent_recording: parent_recording,

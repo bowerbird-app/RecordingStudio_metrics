@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Dummy and root Gemfiles pin Recording Studio `v6.10.0` and FlatPack `v0.1.366`. Dummy companions: Accessible `v0.37.0`, API `v0.23.1`, Admin `v2.13.0`, Trashable `v0.14.1`, Cache `v0.6.3`, Root Switchable `v0.15.0`. Moveable stays `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`. Dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. Gem version stays `0.8.0`.
+- Dummy and root Gemfiles pin Recording Studio `v6.14.0` and FlatPack `v0.1.374`. Dummy companions: Accessible `v0.41.0`, API `v0.23.3`, Admin `v2.13.1`, Moveable `v4.2.0`, Logs `v0.7.5`, Trashable `v0.16.0`, Cache `v0.6.3`, Root Switchable `v0.15.0`, Icons `v0.2.1`. Dummy already copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. Core `6.11.0` through `6.14.0` add no migrations. Seeds use `RecordingStudio.kept_sql`. The dummy still defines `recording_studio_trashable_kept_sql` so Accessible, Admin, and API can call it. Gem version stays `0.8.0`.
 
 ## [0.8.0] - 2026-11-06
 
