@@ -11,7 +11,7 @@ class AuthorizeWriteTest < ActiveSupport::TestCase
     )
     @workspace = Workspace.create!(name: "Write Gate #{SecureRandom.hex(4)}")
     Current.actor = @user
-    @root = RecordingStudio.root_recording_for(@workspace)
+    @root = RecordingStudio.create_root_recording!(@workspace)
   end
 
   teardown do

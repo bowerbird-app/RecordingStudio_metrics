@@ -13,9 +13,9 @@ Needed from the API gem:
 2. Optional: a documented hook to attach OpenAPI query parameters for filters/interval/start/end without putting that logic in each handler. (This gem currently passes an `openapi[:parameters]` array on the execute endpoint.)
 3. Optional: `RegisteredEndpointsController` support for handler `{ json:, status: }` results. Status codes currently require raising the API error classes above.
 
-## RecordingStudio_admin (v2.13.0)
+## RecordingStudio_admin (v2.16.0)
 
-Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: [{ x:, y: }] }` series. It does not construct `RecordingStudioAdmin::Widget` or authorize Admin. The dummy host builds Admin widgets with Admin's Widget API and `summary_value` / `chart_series_proc`. `Admin.attach_filters(screen, identifier, only:)` maps chosen metric filters onto `Screen.filter` and passes chosen filter values into `execute`. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs. The dummy pin is GitHub tag `v2.13.0`. Admin `v2.13.0` also loads RecordingStudio_logs. The dummy pin for Logs is GitHub tag `v0.7.4`.
+Done here: `RecordingStudioMetrics::Admin` converts results into scalar values and `{ name:, data: [{ x:, y: }] }` series. It does not construct `RecordingStudioAdmin::Widget` or authorize Admin. The dummy host builds Admin widgets with Admin's Widget API and `summary_value` / `chart_series_proc`. `Admin.attach_filters(screen, identifier, only:)` maps chosen metric filters onto `Screen.filter` and passes chosen filter values into `execute`. The dummy app registers a `MetricsAnalyticsScreen` that uses those public APIs. The dummy pin is GitHub tag `v2.16.0`. Admin `v2.16.0` also loads RecordingStudio_logs. The dummy pin for Logs is GitHub tag `v0.7.4`.
 
 Needed from the Admin gem:
 

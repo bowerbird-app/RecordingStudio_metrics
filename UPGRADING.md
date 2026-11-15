@@ -2,7 +2,18 @@
 
 ## Current dummy pins
 
-Gem version stays `0.8.0`. The root and dummy Gemfiles pin Recording Studio `v6.10.0` and FlatPack `v0.1.366`. The dummy also pins Accessible `v0.37.0`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, Logs `v0.7.4`, Trashable `v0.14.1`, Cache `v0.6.3`, and Root Switchable `v0.15.0`. Recording Studio `6.9.0` stores `root_recording_id` on events; the dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. The gemspec still requires `recording_studio` `>= 6.1.0`.
+Gem version is `0.9.0`. The root and dummy Gemfiles pin Recording Studio `v7.0.0` and FlatPack `v0.1.366`. The dummy also pins Accessible `v0.43.1`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.16.0`, Logs `v0.7.4`, Trashable `v0.16.1`, Cache `v0.6.3`, and Root Switchable `v0.15.1`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
+
+## Upgrading to 0.9.0
+
+`0.9.0` requires Recording Studio 7. Metric registration, `execute`, API exposure, and Admin result adapters stay the same. Update the host dependency to `recording_studio_metrics`, `~> 0.9.0`.
+
+1. No migrations in this gem.
+2. `RecordingStudio.root_recording_for` only finds a root and returns `nil` when that recordable has none. Seeds, setup, and tests that created a root by looking it up call `RecordingStudio.create_root_recording!(recordable, actor:)`.
+3. `config.authorize_write` must allow that create. Core passes `root_recording: nil` for it. The dummy allows a persisted user in that case. A later child write still needs a role on the root.
+4. This repository’s dummy host pins Recording Studio `v7.0.0`, FlatPack `v0.1.366`, Accessible `v0.43.1`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.16.0`, Logs `v0.7.4`, Trashable `v0.16.1`, Cache `v0.6.3`, and Root Switchable `v0.15.1`. Match those tags if you want the dummy companion set. Accessible `0.37`, Admin `2.13`, Trashable `0.14`, and Root Switchable `0.15.0` all cap Recording Studio below 7.
+
+If you are still on `0.8.0` or older, complete that release's notes first.
 
 ## Upgrading to 0.8.0
 
@@ -19,7 +30,7 @@ Accessible. Update the host dependency to `recording_studio_metrics`, `~> 0.8.0`
 4. At the `0.8.0` release, this repository’s dummy host pinned Recording Studio `v6.5.0`,
    FlatPack `v0.1.341`, Accessible `v0.24.2`, API `v0.18.4`, Moveable `v4.1.1`, Icons `v0.2.1`,
    Logs `v0.7.4`, Trashable `v0.12.3`, Cache `v0.6.1`, Root Switchable `v0.11.3`, and Admin `v2.8.2`.
-   Current pins are in the section above. Gemspec still requires `recording_studio` `>= 6.1.0`.
+   Pins after `0.8.0` are in the sections above. At `0.8.0` the gemspec required `recording_studio` `>= 6.1.0`.
    Recording Studio `6.5.0` and later need `config.authorize_write`.
    The dummy delegates that gate to Accessible (`:edit` on the root, Access writes via
    `AccessCreationContext` or `:admin`). It does not use `actor.present?` or

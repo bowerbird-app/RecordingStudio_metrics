@@ -20,7 +20,9 @@ RecordingStudio.configure do |config|
   # (same path as grant_access / bootstrap_owner_access!), not a logged-in check.
   config.authorize_write = lambda { |actor:, root_recording:, recordable:, **|
     next false unless actor.is_a?(User) && actor.persisted?
-    next false unless root_recording
+    # Core 7 creates a root with root_recording nil. A persisted user may open that root.
+    # Later writes still need a role on it.
+    next true if root_recording.nil?
 
     if defined?(RecordingStudio::Access) && recordable.is_a?(RecordingStudio::Access)
       next true if RecordingStudioAccessible::AccessCreationContext.allowed?

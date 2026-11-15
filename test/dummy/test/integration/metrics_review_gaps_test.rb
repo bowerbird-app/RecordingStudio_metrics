@@ -191,7 +191,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "recordable model metrics use recordable_root_relation" do
     Current.actor = @actor
-    root = RecordingStudio.root_recording_for(@alpha)
+    root = RecordingStudio.create_root_recording!(@alpha)
     grant_admin!(@actor, root)
     folder = Folder.create!(name: "Docs #{SecureRandom.hex(4)}")
     RecordingStudio.record!(
@@ -200,7 +200,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
       root_recording: root,
       parent_recording: root
     )
-    other_root = RecordingStudio.root_recording_for(@beta)
+    other_root = RecordingStudio.create_root_recording!(@beta)
     grant_admin!(@actor, other_root)
     other_folder = Folder.create!(name: "Other #{SecureRandom.hex(4)}")
     RecordingStudio.record!(
@@ -242,7 +242,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "recording scope isolates the access recordable" do
     Current.actor = @actor
-    root = RecordingStudio.root_recording_for(@alpha)
+    root = RecordingStudio.create_root_recording!(@alpha)
     grant_admin!(@actor, root)
     folder = Folder.create!(name: "Scoped #{SecureRandom.hex(4)}")
     recording = RecordingStudio.record!(
@@ -309,7 +309,7 @@ class MetricsReviewGapsTest < ActiveSupport::TestCase
 
   test "admin widget is a real Admin widget and analytics screen is registered" do
     assert defined?(RecordingStudioAdmin::Widget)
-    assert_equal "2.13.0", RecordingStudioAdmin::VERSION
+    assert_equal "2.16.0", RecordingStudioAdmin::VERSION
     refute RecordingStudioMetrics::Admin.respond_to?(:widget)
 
     widget = RecordingStudioAdmin.widget_for("metrics.members.total")

@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-15
+
 ### Changed
-- Dummy and root Gemfiles pin Recording Studio `v6.10.0` and FlatPack `v0.1.366`. Dummy companions: Accessible `v0.37.0`, API `v0.23.1`, Admin `v2.13.0`, Trashable `v0.14.1`, Cache `v0.6.3`, Root Switchable `v0.15.0`. Moveable stays `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`. Dummy copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`. Gem version stays `0.8.0`.
+- Require `recording_studio` `>= 7.0`, `< 8.0`. Root and dummy Gemfiles pin tag `v7.0.0`. FlatPack stays `v0.1.366`.
+- Dummy companions that cannot resolve core 7 move with it: Accessible `v0.43.1`, Admin `v2.16.0`, Trashable `v0.16.1`, Root Switchable `v0.15.1`. API stays `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`, Cache `v0.6.3`.
+- `RecordingStudio.root_recording_for` only finds a root. Seeds and tests that create a root call `RecordingStudio.create_root_recording!`. The dummy `authorize_write` allows that create when `root_recording` is nil. Later writes still need a role on the root.
+- Seeds look up kept child recordings with `RecordingStudio::Recording.kept`. Trashable 0.16 no longer defines `recording_studio_trashable_kept_sql`.
+
+### Upgrade notes
+- See `UPGRADING.md`. Hosts on Recording Studio 6.x need 7.0.0 before this gem. Paths that created a root by looking it up call `create_root_recording!` and allow that write when `root_recording` is nil.
 
 ## [0.8.0] - 2026-11-06
 
@@ -163,7 +171,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.1...v0.7.2
