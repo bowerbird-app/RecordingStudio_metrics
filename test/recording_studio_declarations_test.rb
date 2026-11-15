@@ -96,7 +96,9 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   end
 
   test "parentless child under an existing root is invalid" do
-    root_recording = RecordingStudio.create_root_recording!(Workspace.create!(name: unique_name("Parentless Workspace")))
+    root_recording = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: unique_name("Parentless Workspace"))
+    )
     grant_admin!(Current.actor, root_recording)
     folder = Folder.create!(name: unique_name("Parentless Folder"))
     recording = RecordingStudio::Recording.new(root_recording: root_recording, recordable: folder)
@@ -106,7 +108,9 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
   end
 
   test "page cannot be recorded under another page" do
-    root_recording = RecordingStudio.create_root_recording!(Workspace.create!(name: unique_name("Invalid Page Workspace")))
+    root_recording = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: unique_name("Invalid Page Workspace"))
+    )
     grant_admin!(Current.actor, root_recording)
     page_recording = record_child(Page.new(title: unique_name("Parent Page")), root_recording, root_recording)
 

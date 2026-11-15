@@ -146,7 +146,9 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Counted Workspace")
     2.times do
-      extra = RecordingStudio.create_root_recording!(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
+      extra = RecordingStudio.create_root_recording!(
+        Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}")
+      )
       grant_admin!(@user, extra)
     end
 

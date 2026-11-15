@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dummy companions that cannot resolve core 7 move with it: Accessible `v0.43.1`, Admin `v2.16.0`, Trashable `v0.16.1`, Root Switchable `v0.15.1`. API stays `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Logs `v0.7.4`, Cache `v0.6.3`.
 - `RecordingStudio.root_recording_for` only finds a root. Seeds and tests that create a root call `RecordingStudio.create_root_recording!`. The dummy `authorize_write` allows that create when `root_recording` is nil. Later writes still need a role on the root.
 - Seeds look up kept child recordings with `RecordingStudio::Recording.kept`. Trashable 0.16 no longer defines `recording_studio_trashable_kept_sql`.
+- Dummy lockfile updates `msgpack` to `1.8.7`.
 
 ### Upgrade notes
 - See `UPGRADING.md`. Hosts on Recording Studio 6.x need 7.0.0 before this gem. Paths that created a root by looking it up call `create_root_recording!` and allow that write when `root_recording` is nil.
