@@ -2,7 +2,7 @@
 
 ## Current dummy pins
 
-Gem version is `0.9.0`. The root and dummy Gemfiles pin Recording Studio `v7.0.0` and FlatPack `v0.1.366`. The dummy also pins Accessible `v0.43.1`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.16.0`, Logs `v0.7.4`, Trashable `v0.16.1`, Cache `v0.6.3`, and Root Switchable `v0.15.1`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
+Gem version is `0.9.0`. The root and dummy Gemfiles pin Recording Studio `v7.3.0` and FlatPack `v0.1.377`. The dummy also pins Accessible `v0.45.1`, API `v1.2.1`, Moveable `v6.0.0`, Icons `v0.4.0`, Admin `v2.18.0`, Logs `v0.8.0`, Trashable `v1.0.0`, Cache `v0.7.0`, and Root Switchable `v0.16.0`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
 
 ## Upgrading to 0.9.0
 
@@ -11,7 +11,7 @@ Gem version is `0.9.0`. The root and dummy Gemfiles pin Recording Studio `v7.0.0
 1. No migrations in this gem.
 2. `RecordingStudio.root_recording_for` only finds a root and returns `nil` when that recordable has none. Seeds, setup, and tests that created a root by looking it up call `RecordingStudio.create_root_recording!(recordable, actor:)`.
 3. `config.authorize_write` must allow that create. Core passes `root_recording: nil` for it. The dummy allows a persisted user in that case. A later child write still needs a role on the root.
-4. This repository’s dummy host pins Recording Studio `v7.0.0`, FlatPack `v0.1.366`, Accessible `v0.43.1`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.16.0`, Logs `v0.7.4`, Trashable `v0.16.1`, Cache `v0.6.3`, and Root Switchable `v0.15.1`. Match those tags if you want the dummy companion set. Accessible `0.37`, Admin `2.13`, Trashable `0.14`, and Root Switchable `0.15.0` all cap Recording Studio below 7. The dummy lockfile uses `msgpack` `1.8.7`.
+4. At the `0.9.0` release, this repository’s dummy host pinned Recording Studio `v7.0.0`, FlatPack `v0.1.366`, Accessible `v0.43.1`, API `v0.23.1`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.16.0`, Logs `v0.7.4`, Trashable `v0.16.1`, Cache `v0.6.3`, and Root Switchable `v0.15.1`. Current pins are in the section above. Accessible `0.37`, Admin `2.13`, Trashable `0.14`, and Root Switchable `0.15.0` all cap Recording Studio below 7. The dummy lockfile uses `msgpack` `1.8.7`.
 
 If you are still on `0.8.0` or older, complete that release's notes first.
 
