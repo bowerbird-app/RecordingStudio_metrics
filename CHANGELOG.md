@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Root and dummy Gemfiles pin the latest GitHub release of each companion: Recording Studio `v7.3.0`, FlatPack `v0.1.377`, Accessible `v0.45.1`, API `v1.2.1`, Moveable `v6.0.0`, Icons `v0.4.0`, Admin `v2.18.0`, Logs `v0.8.0`, Trashable `v1.0.0`, Cache `v0.7.0`, and Root Switchable `v0.16.0`. Metric registration and `execute` are unchanged.
+
 ## [0.9.0] - 2026-11-15
 
 ### Changed
