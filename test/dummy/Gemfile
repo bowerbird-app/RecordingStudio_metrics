@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "recording_studio_metrics", path: "../.."
 
 # RecordingStudio engine
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.3.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.4.0"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.45.1"
 # API 1.2.1 needs Moveable >= 5.0, Logs >= 0.8.0, and Trashable >= 0.17.0.
 # Pin Moveable and Icons so Bundler can resolve those GitHub gems; they are not on RubyGems.

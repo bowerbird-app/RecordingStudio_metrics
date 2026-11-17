@@ -4,7 +4,7 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `>= 7.0`, `< 8.0` (GitHub tag `v7.3.0` in the root and dummy Gemfiles)
+- Recording Studio `>= 7.0`, `< 8.0` (GitHub tag `v7.4.0` in the root and dummy Gemfiles)
 - Accessible dummy tag `v0.45.1` and Root Switchable dummy tag `v0.16.0`
 - Admin dummy tag `v2.18.0` and Logs dummy tag `v0.8.0`
 - API dummy tag `v1.2.1`, Moveable dummy tag `v6.0.0` (`require: false`), Icons dummy tag `v0.4.0` (`require: false`)
