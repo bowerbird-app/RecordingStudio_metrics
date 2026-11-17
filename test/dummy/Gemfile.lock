@@ -128,7 +128,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_metrics (0.9.0)
+    recording_studio_metrics (0.9.1)
       rails (~> 8.1.0)
       recording_studio (>= 7.0, < 8.0)
 
@@ -694,7 +694,7 @@ CHECKSUMS
   recording_studio_cache (0.7.0)
   recording_studio_icons (0.4.0)
   recording_studio_logs (0.8.0)
-  recording_studio_metrics (0.9.0)
+  recording_studio_metrics (0.9.1)
   recording_studio_moveable (6.0.0)
   recording_studio_root_switchable (0.16.0)
   recording_studio_trashable (1.0.0)
