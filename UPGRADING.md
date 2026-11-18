@@ -2,7 +2,17 @@
 
 ## Current dummy pins
 
-Gem version is `0.9.1`. The root and dummy Gemfiles pin Recording Studio `v7.4.0` and FlatPack `v0.1.377`. The dummy also pins Accessible `v0.45.1`, API `v1.2.1`, Moveable `v6.0.0`, Icons `v0.4.0`, Admin `v2.18.0`, Logs `v0.8.0`, Trashable `v1.0.0`, Cache `v0.7.0`, and Root Switchable `v0.16.0`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
+Gem version is `0.9.2`. The root and dummy Gemfiles pin Recording Studio `v7.7.1` and FlatPack `v0.1.378`. The dummy also pins Accessible `v0.54.0`, API `v1.15.0`, Moveable `v6.0.1`, Icons `v0.4.1`, Admin `v2.19.0`, Logs `v0.8.1`, Trashable `v1.2.0`, Cache `v0.7.0`, and Root Switchable `v0.16.0`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
+
+## Upgrading to 0.9.2
+
+`0.9.2` keeps metric registration, `execute`, API exposure, and Admin result adapters. Update the host dependency to `recording_studio_metrics`, `~> 0.9.2`.
+
+1. No migrations in this gem.
+2. Hosts that load API 1.15 need Recording Studio `>= 7.7` and Accessible `>= 0.50`, plus `config/recording_studio_api.yml`. A minimal file is `shared: {}`.
+3. At the `0.9.1` release, this repository’s dummy host pinned Recording Studio `v7.4.0`, FlatPack `v0.1.377`, Accessible `v0.45.1`, API `v1.2.1`, Moveable `v6.0.0`, Icons `v0.4.0`, Admin `v2.18.0`, Logs `v0.8.0`, Trashable `v1.0.0`, Cache `v0.7.0`, and Root Switchable `v0.16.0`. Current pins are in the section above.
+
+If you are still on `0.9.0` or older, complete that release's notes first.
 
 ## Upgrading to 0.9.0
 
