@@ -1,0 +1,2 @@
+# Minimal boot config. API 1.12 and later raise when this file is missing.
+shared: {}

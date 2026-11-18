@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-11-18
+
+### Changed
+- Root and dummy Gemfiles pin Recording Studio `v7.7.1` and FlatPack `v0.1.378`. Dummy companions: Accessible `v0.54.0`, API `v1.15.0`, Moveable `v6.0.1`, Icons `v0.4.1`, Admin `v2.19.0`, Logs `v0.8.1`, and Trashable `v1.2.0`. Cache stays `v0.7.0`. Root Switchable stays `v0.16.0`.
+- Dummy `config/recording_studio_api.yml` is a minimal `shared: {}` file so API 1.15 can boot. Metric registration and `execute` are unchanged.
+
+### Upgrade notes
+- See `UPGRADING.md`. The gemspec still requires `recording_studio` `>= 7.0`, `< 8.0`. Hosts that load API 1.15 also need Recording Studio `>= 7.7` and Accessible `>= 0.50`.
+
 ## [0.9.1] - 2026-11-17
 
 ### Changed
@@ -176,7 +185,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.3...v0.8.0
 [0.7.3]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.7.2...v0.7.3
