@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-11-19
+
+### Changed
+- Root and dummy Gemfiles pin Recording Studio `v7.8.0` (`~> 7.8`) and FlatPack `v0.2.0` (`~> 0.2`). Dummy companions: Accessible `v0.55.0`, API `v1.19.0`, Moveable `v6.0.3`, Icons `v0.4.2`, Admin `v2.19.1`, Logs `v0.8.2`, Trashable `v1.2.3`, Cache `v0.7.1`, and Root Switchable `v0.16.1`.
+- The dummy importmap drops the `flat_pack/heroicons` pin. `test/dummy/install_page.html` drops that pin and the `flat-pack--icon` controller. Metric registration and `execute` are unchanged.
+
+### Upgrade notes
+- Hosts MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations if they have not.
+- flat_pack 0.2.0 is supported; hosts moving to 0.2 must remove the manual `flat_pack/heroicons` importmap pin and any `flat-pack--icon` controller registration.
+- The gemspec still requires `recording_studio` `>= 7.0`, `< 8.0`. Hosts on FlatPack 0.1.x can stay there.
+
 ## [0.9.2] - 2026-11-18
 
 ### Changed
@@ -185,7 +196,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.8.0...v0.9.0
