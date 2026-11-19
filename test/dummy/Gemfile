@@ -4,26 +4,26 @@ source "https://rubygems.org"
 gem "recording_studio_metrics", path: "../.."
 
 # RecordingStudio engine
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.7.1"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.54.0"
-# API 1.15.0 needs Moveable >= 5.0, < 7.0, Logs >= 0.8.0, Trashable >= 0.17.0,
-# Accessible >= 0.50, and Recording Studio >= 7.7.
+gem "recording_studio", "~> 7.8", github: "bowerbird-app/RecordingStudio", tag: "v7.8.0"
+gem "recording_studio_accessible", "~> 0.55", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.55.0"
+# API 1.19 needs Moveable >= 5.0, < 7.0, Logs >= 0.8.0, Trashable >= 0.17.0,
+# Accessible >= 0.50, Metrics >= 0.9, < 2, and Recording Studio >= 7.7.
 # Pin Moveable and Icons so Bundler can resolve those GitHub gems; they are not on RubyGems.
-gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v1.15.0"
-gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.1", require: false
-gem "recording_studio_icons", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.1", require: false
-gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.0"
-# Admin 2.19.0 and API 1.15.0 require Logs. Logs v0.8.1 declares
+gem "recording_studio_api", "~> 1.19", github: "bowerbird-app/RecordingStudio_api", tag: "v1.19.0"
+gem "recording_studio_moveable", "~> 6.0", github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.3", require: false
+gem "recording_studio_icons", "~> 0.4", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.2", require: false
+gem "recording_studio_admin", "~> 2.19", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.1"
+# Admin 2.19 and API 1.19 require Logs. Logs v0.8.2 declares
 # recording_studio >= 7.0, < 8.0 and recording_studio_metrics >= 0.9.0, < 1.0.
-gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.1"
-# Admin 2.19.0 allows Trashable >= 0.16.1, < 2.0. Accessible 0.54.0 and API 1.15.0
+gem "recording_studio_logs", "~> 0.8", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.2"
+# Admin 2.19 allows Trashable >= 0.16.1, < 2.0. Accessible 0.55 and API 1.19
 # require Trashable >= 0.17.0, < 2.0. recording_studio_metrics is already pinned via path above.
-gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.0", require: false
+gem "recording_studio_trashable", "~> 1.2", github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.2.3", require: false
 # Required by recording_studio_root_switchable (recording_studio_cache >= 0.5, < 1.0).
-gem "recording_studio_cache", github: "bowerbird-app/RecordingStudio_cache", tag: "v0.7.0"
+gem "recording_studio_cache", "~> 0.7", github: "bowerbird-app/RecordingStudio_cache", tag: "v0.7.1"
 
 # Root switcher for the top nav
-gem "recording_studio_root_switchable", github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.0"
+gem "recording_studio_root_switchable", "~> 0.16", github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.1"
 
 # Devise authentication
 gem "devise"
@@ -49,7 +49,7 @@ gem "jbuilder"
 gem "tailwindcss-rails"
 
 # FlatPack UI component library [https://github.com/bowerbird-app/flatpack]
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.378"
+gem "flat_pack", "~> 0.2", github: "bowerbird-app/flatpack", tag: "v0.2.0"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
