@@ -7,6 +7,7 @@
   Git gems are checked out as bundler/gems/<name>-<rev>, so a glob for a
   directory literally named flatpack never matches. tailwindcss:build links
   FlatPack::Engine.root and RecordingStudio::Engine.root here first.
+  The flat_pack link target is the installed revision (v0.2.0).
   Tokens stay in flat_pack/variables. Do not redeclare them in this file.
 */
 @source "../../../vendor/engines/flat_pack/app/components";
