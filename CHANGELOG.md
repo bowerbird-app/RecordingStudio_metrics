@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - OpenAPI summaries and parameter descriptions on the metrics endpoints are REST wording. Agent-facing copy lives in `McpCopy`.
+- Root and dummy lockfiles use `puma` `8.1.3`. Dummy also uses `net-ssh` `7.3.10` and `brakeman` `8.1.1`. `.ruby-version` is `3.3.14`.
 
 ### Upgrade notes
 - Pin `recording_studio_metrics`, `~> 0.11.0`. No migration.

@@ -22,6 +22,7 @@ Gem version is `0.11.0`. The root and dummy Gemfiles pin Recording Studio `v7.8.
    Default `tool_names` is `operations_metrics_index` and `operations_metrics_show`. Pass `api: :admin` or `api: :public` when the catalog was registered on that API.
 5. Hyphenated catalog metric names (`users-total`, `mcp_calls-over_time`) are still built by Recording Studio MCP from exposed identifiers. They are not renamed. Hosts can keep including those names, or switch the operations server to `*McpCopy.tool_names` for the list/run endpoints.
 6. No recordable type is registered. Metrics stay endpoint tools (`endpoint:`), not `operation:` / `action:` tree tools.
+7. Dummy and root lockfiles pin `puma` `8.1.3`. Dummy also pins `net-ssh` `7.3.10` and `brakeman` `8.1.1`. Ruby is `3.3.14`.
 
 If you are still on `0.10.0` or older, complete that release's notes first.
 
