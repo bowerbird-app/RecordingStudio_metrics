@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-11-25
+
+### Added
+- Named Recording Studio MCP tools for the catalog endpoints when the host loads `recording_studio_mcp`: `operations_metrics_index` and `operations_metrics_show` by default (`include_tools *RecordingStudioMetrics::McpCopy.tool_names`). `tool_names(api: :admin)` and `tool_names(api: :public)` match `Api.register!(api:)`. `RecordingStudioMetrics::McpCopy` owns MCP titles, descriptions, input copy, and outputs. MCP stays optional.
+
+### Changed
+- OpenAPI summaries and parameter descriptions on the metrics endpoints are REST wording. Agent-facing copy lives in `McpCopy`.
+
+### Upgrade notes
+- Pin `recording_studio_metrics`, `~> 0.11.0`. No migration.
+- Metric `execute`, filters, grouping, and GET-only API behaviour are unchanged.
+- Hyphenated catalog metric tool names (`users-total`) still come from Recording Studio MCP. Named endpoint tools keep `operations_metrics_index` / `operations_metrics_show` (and the same pattern for other named APIs).
+- Hosts that load MCP include `*RecordingStudioMetrics::McpCopy.tool_names` on the operations server after `Api.register!(api: :operations)`. Use `tool_names(api: :admin)` when the catalog is on the admin API.
+- See `UPGRADING.md`.
+
 ## [0.10.0] - 2026-11-19
 
 ### Changed
@@ -196,7 +211,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakdown supports sum and average; historical timeseries computes population at end of period.
 - PostgreSQL `date_trunc` is isolated behind an adapter; standard metrics wrap database errors.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/bowerbird-app/RecordingStudio_metrics/compare/v0.9.0...v0.9.1

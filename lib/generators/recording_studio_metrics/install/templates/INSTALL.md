@@ -9,3 +9,4 @@ Next steps:
 5. Run `bin/rails tailwindcss:build` if you use Tailwind CSS.
 6. Mount routes are added at the configured mount path. Adjust auth, layout, and current actor integration to match your host app.
 7. Keep strict recordable declarations enabled and add `recording_studio_recordable(...)` to every configured recordable before running `RecordingStudio.validate_recordable_declarations!`.
+8. MCP is optional. After `Api.register!(api:)`, include `*RecordingStudioMetrics::McpCopy.tool_names` on the matching MCP server.

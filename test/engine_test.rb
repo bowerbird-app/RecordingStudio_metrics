@@ -93,6 +93,7 @@ class EngineTest < Minitest::Test
     refute_includes names, "recording_studio_metrics.apply_model_extensions"
     refute_includes names, "recording_studio_metrics.apply_controller_extensions"
     refute RecordingStudioMetrics::Engine.respond_to?(:apply_model_extensions)
+    assert_includes names, "recording_studio_metrics.mcp"
   end
 
   private

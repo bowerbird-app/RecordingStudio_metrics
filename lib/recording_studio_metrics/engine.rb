@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "mcp_copy"
+
 module RecordingStudioMetrics
   class Engine < ::Rails::Engine
     isolate_namespace RecordingStudioMetrics
@@ -36,6 +38,10 @@ module RecordingStudioMetrics
 
     initializer "recording_studio_metrics.after_initialize", after: "recording_studio_metrics.load_config" do |_app|
       RecordingStudioMetrics.configuration.hooks.run(:after_initialize, self)
+    end
+
+    initializer "recording_studio_metrics.mcp" do
+      config.to_prepare { McpCopy.register! }
     end
   end
 end

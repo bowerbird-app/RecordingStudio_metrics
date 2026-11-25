@@ -8,6 +8,10 @@ Done here: `RecordingStudioMetrics::Api.register!(api:)` calls `RecordingStudioA
 
 1. Dispatch registered endpoints by HTTP verb as well as path. **Done in RS_API v0.6.7+** (`registered_endpoint_request_match` uses `match(path:, http_verb:)`). Metrics stays GET-only by registration, not because the dispatcher ignores the verb.
 
+## RecordingStudio_mcp
+
+Done here: `RecordingStudioMetrics::McpCopy` calls `register_tool` for each catalog endpoint the host registered (`{api}_metrics_index`, `{api}_metrics_show`). Hosts include `*RecordingStudioMetrics::McpCopy.tool_names` (operations names by default). MCP is optional; the gemspec does not depend on it. Hyphenated catalog metric tools stay in the MCP gem.
+
 Needed from the API gem:
 
 2. Optional: a documented hook to attach OpenAPI query parameters for filters/interval/start/end without putting that logic in each handler. (This gem currently passes an `openapi[:parameters]` array on the execute endpoint.)

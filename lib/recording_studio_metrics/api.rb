@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "mcp_copy"
+
 module RecordingStudioMetrics
   module Api
     EXECUTE_OPENAPI_PARAMETERS = [
@@ -7,7 +9,7 @@ module RecordingStudioMetrics
         name: "filters",
         in: "query",
         required: false,
-        description: "Declared metric filters only. Unknown names are rejected.",
+        description: "Declared metric filters as an object. Unknown names are rejected.",
         schema: { type: "object", additionalProperties: true }
       },
       {
@@ -21,53 +23,62 @@ module RecordingStudioMetrics
         name: "start",
         in: "query",
         required: false,
-        description: "Inclusive period start (ISO-8601). Aliases: start_at, from.",
+        description: "Inclusive period start (ISO-8601). Aliases: `start_at`, `from`.",
         schema: { type: "string", format: "date-time" }
       },
       {
         name: "from",
         in: "query",
         required: false,
-        description: "Alias for start. Must match start when both are provided.",
+        description: "Alias for `start`. Must match `start` when both are sent.",
         schema: { type: "string", format: "date-time" }
       },
       {
         name: "end",
         in: "query",
         required: false,
-        description: "Exclusive period end (ISO-8601). Aliases: end_at, to.",
+        description: "Exclusive period end (ISO-8601). Aliases: `end_at`, `to`.",
         schema: { type: "string", format: "date-time" }
       },
       {
         name: "to",
         in: "query",
         required: false,
-        description: "Alias for end. Must match end when both are provided.",
+        description: "Alias for `end`. Must match `end` when both are sent.",
         schema: { type: "string", format: "date-time" }
       },
       {
         name: "group_by",
         in: "query",
         required: false,
-        description: "Split results by one of the metric's catalog group_by columns. Groups below " \
-                     "min_group_size rows are merged into `other`. Unsupported values are rejected.",
+        description: "One catalog `group_by` column. Groups below `min_group_size` merge into `other`.",
         schema: { type: "string" }
       },
       {
         name: "timezone",
         in: "query",
         required: false,
-        description: "IANA timezone used for bucket boundaries.",
+        description: "IANA timezone for bucket boundaries.",
         schema: { type: "string" }
       }
     ].freeze
 
     module_function
 
+    def registered_apis
+      @registered_apis ||= []
+    end
+
+    def reset_registered_apis!
+      @registered_apis = []
+    end
+
     def register!(api: :public, prefix: "metrics")
       unless defined?(RecordingStudioApi) && RecordingStudioApi.respond_to?(:register_endpoint)
         raise LoadError, "RecordingStudioApi is not available"
       end
+
+      remember_api(api)
 
       RecordingStudioApi.register_endpoint(
         metrics_endpoint_name(api, :index),
@@ -76,8 +87,9 @@ module RecordingStudioMetrics
         path: prefix,
         handler: DiscoveryHandler,
         openapi: {
-          summary: "List metrics available to the caller",
-          description: "Each entry includes unit, group_by, supported_intervals, date_range, timezone, and freshness.",
+          summary: "List metrics",
+          description: "Returns catalog entries the caller can run. " \
+                       "Optional `filters[resource]` limits to one resource.",
           tags: ["Metrics"],
           parameters: DiscoveryHandler::OPENAPI_PARAMETERS
         }
@@ -90,12 +102,21 @@ module RecordingStudioMetrics
         path: "#{prefix}/:resource/:name",
         handler: ExecuteHandler,
         openapi: {
-          summary: "Execute a registered metric",
+          summary: "Execute a metric",
+          description: "GET a registered metric by resource and name.",
           tags: ["Metrics"],
           parameters: EXECUTE_OPENAPI_PARAMETERS
         }
       )
+
+      McpCopy.register!
     end
+
+    def remember_api(api)
+      key = api.to_sym
+      registered_apis << key unless registered_apis.include?(key)
+    end
+    private_class_method :remember_api
 
     def metrics_endpoint_name(api, kind)
       :"#{api}_metrics_#{kind}"
@@ -137,7 +158,8 @@ module RecordingStudioMetrics
           name: "filters",
           in: "query",
           required: false,
-          description: "Catalog filters. Supported: resource (filters[resource]=users). Unknown names are rejected.",
+          description: "Catalog filters. Supported: `resource` (`filters[resource]=users`). " \
+                       "Unknown names are rejected.",
           schema: {
             type: "object",
             properties: { resource: { type: "string" } },
