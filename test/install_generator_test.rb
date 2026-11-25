@@ -56,6 +56,7 @@ class InstallGeneratorTest < Minitest::Test
     assert_includes install_guide, "bin/rails db:migrate"
     assert_includes install_guide, "auth, layout, and current actor integration"
     assert_includes install_guide, "recording_studio_recordable"
+    assert_includes install_guide, "McpCopy.tool_names"
     refute_includes install_guide, "RecordingStudio v3"
   end
 end

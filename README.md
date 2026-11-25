@@ -1,6 +1,6 @@
 # RecordingStudioMetrics
 
-Shared metrics and analytics for Recording Studio recordables and ordinary Active Record models. Define a metric once, then execute it from Admin, API, jobs, host dashboards, and MCP tools.
+Shared metrics and analytics for Recording Studio recordables and ordinary Active Record models. Define a metric once, then execute it from Admin, API, jobs, host dashboards, and named MCP tools.
 
 This gem is the calculation engine. It does not render charts, authenticate callers, or own recordable business logic. Upgrade notes live in `UPGRADING.md`.
 
@@ -158,6 +158,19 @@ end
 ```
 
 `api_authorize` stays on the registering gem. Metrics does not teach Accessible or Admin auth. The hook receives the RS_API request context. Falsy denies with 403 and hides the metric from discovery. Truthy on a `blast_radius: :site` resource grants site scope for that call. Omit it and `Context.from_api` behaves as before.
+
+## MCP integration
+
+Optional. Requires RecordingStudio_mcp on the host. This gem does not depend on it. When MCP is loaded, `RecordingStudioMetrics::McpCopy.register!` names the catalog endpoints after `Api.register!(api:)`.
+
+```ruby
+RecordingStudioMetrics::Api.register!(api: :operations)
+RecordingStudioMcp.register_server(:operations, api: :operations) do
+  include_tools *RecordingStudioMetrics::McpCopy.tool_names
+end
+```
+
+`McpCopy.tool_names` is `operations_metrics_index` and `operations_metrics_show`. Pass `api: :admin` or `api: :public` when the catalog lives on that named API. Hyphenated per-metric names (`users-total`) still come from MCP's catalog tools. Scope still comes from the trusted Context on the connection, not from tool arguments.
 
 ## Admin integration
 

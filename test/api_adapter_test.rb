@@ -6,11 +6,13 @@ class ApiAdapterTest < Minitest::Test
   def setup
     RecordingStudioMetrics.registry.reset!
     RecordingStudioMetrics.reset_configuration!
+    RecordingStudioMetrics::Api.reset_registered_apis!
   end
 
   def teardown
     RecordingStudioMetrics.registry.reset!
     RecordingStudioMetrics.reset_configuration!
+    RecordingStudioMetrics::Api.reset_registered_apis!
   end
 
   def test_discovery_without_a_usable_context_fails_closed
@@ -74,6 +76,30 @@ class ApiAdapterTest < Minitest::Test
     %w[filters interval start from end to timezone group_by].each do |name|
       assert_includes names, name
     end
+  end
+
+  def test_openapi_summaries_are_rest_wording
+    recorded = []
+    api_stand_in = Module.new do
+      define_singleton_method(:register_endpoint) do |*_args, **kwargs|
+        recorded << kwargs.fetch(:openapi)
+      end
+    end
+
+    Object.const_set(:RecordingStudioApi, api_stand_in)
+    begin
+      RecordingStudioMetrics::Api.register!(api: :admin)
+    ensure
+      Object.send(:remove_const, :RecordingStudioApi) if defined?(RecordingStudioApi)
+    end
+
+    index, show = recorded
+    assert_equal "List metrics", index.fetch(:summary)
+    assert_includes index.fetch(:description), "catalog entries"
+    refute_includes index.fetch(:description), "this connection"
+    assert_equal "Execute a metric", show.fetch(:summary)
+    assert_includes show.fetch(:description), "GET"
+    refute_includes show.fetch(:description), "this connection"
   end
 
   def test_discovery_hides_metrics_the_api_authorize_hook_denies

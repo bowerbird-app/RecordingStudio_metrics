@@ -2,7 +2,29 @@
 
 ## Current dummy pins
 
-Gem version is `0.10.0`. The root and dummy Gemfiles pin Recording Studio `v7.8.0` (`~> 7.8`) and FlatPack `v0.2.0` (`~> 0.2`). The dummy also pins Accessible `v0.55.0`, API `v1.19.0`, Moveable `v6.0.3`, Icons `v0.4.2`, Admin `v2.19.1`, Logs `v0.8.2`, Trashable `v1.2.3`, Cache `v0.7.1`, and Root Switchable `v0.16.1`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
+Gem version is `0.11.0`. The root and dummy Gemfiles pin Recording Studio `v7.8.0` (`~> 7.8`) and FlatPack `v0.2.0` (`~> 0.2`). The dummy also pins Accessible `v0.55.0`, API `v1.19.0`, Moveable `v6.0.3`, Icons `v0.4.2`, Admin `v2.19.1`, Logs `v0.8.2`, Trashable `v1.2.3`, Cache `v0.7.1`, and Root Switchable `v0.16.1`. The gemspec requires `recording_studio` `>= 7.0`, `< 8.0`.
+
+## Upgrading to 0.11.0
+
+`0.11.0` keeps metric registration, `execute`, API exposure, and Admin result adapters. It adds named MCP registration for the catalog endpoints. Update the host dependency to `recording_studio_metrics`, `~> 0.11.0`.
+
+1. No migrations in this gem.
+2. GET-only API paths, query params, and JSON results are unchanged. OpenAPI titles and descriptions are shorter REST wording.
+3. MCP remains optional. This gem does not add a `recording_studio_mcp` dependency. When that gem is loaded, `RecordingStudioMetrics::McpCopy.register!` runs after `Api.register!` and on `to_prepare`.
+4. Include the named tools on the matching MCP server:
+
+   ```ruby
+   RecordingStudioMcp.register_server(:operations, api: :operations) do
+     include_tools *RecordingStudioMetrics::McpCopy.tool_names
+   end
+   ```
+
+   Default `tool_names` is `operations_metrics_index` and `operations_metrics_show`. Pass `api: :admin` or `api: :public` when the catalog was registered on that API.
+5. Hyphenated catalog metric names (`users-total`, `mcp_calls-over_time`) are still built by Recording Studio MCP from exposed identifiers. They are not renamed. Hosts can keep including those names, or switch the operations server to `*McpCopy.tool_names` for the list/run endpoints.
+6. No recordable type is registered. Metrics stay endpoint tools (`endpoint:`), not `operation:` / `action:` tree tools.
+7. Dummy and root lockfiles pin `puma` `8.1.3`. Dummy also pins `net-ssh` `7.3.10` and `brakeman` `8.1.1`. Ruby is `3.3.14`.
+
+If you are still on `0.10.0` or older, complete that release's notes first.
 
 ## Upgrading to 0.10.0
 

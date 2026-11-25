@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://github.com/bowerbird-app/RecordingStudio_metrics"
   spec.summary     = "Shared metrics and analytics engine for Recording Studio"
   spec.description = "Register metrics once for Recording Studio recordables and Active Record " \
-                     "models, then execute them consistently for Admin, API, jobs, and host apps."
+                     "models, then execute them consistently for Admin, API, MCP, jobs, and host apps."
   spec.license     = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 
